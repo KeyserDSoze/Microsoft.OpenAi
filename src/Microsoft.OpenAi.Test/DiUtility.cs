@@ -27,8 +27,8 @@ namespace Microsoft.OpenAi.Test
             services.AddOpenAi(settings =>
             {
                 settings.ApiKey = apiKey;
-                settings.AzureResourceName = resourceName;
-                settings.DeploymentId = deploymentId;
+                settings.Azure.ResourceName = resourceName;
+                settings.Azure.DeploymentId = deploymentId;
             });
             return services;
         }
