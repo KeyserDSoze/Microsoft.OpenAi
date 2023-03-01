@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using Microsoft.OpenAi.Api.Completions;
 using Microsoft.OpenAi.Api.Models;
 using Xunit;
 
@@ -43,7 +44,6 @@ namespace Microsoft.OpenAi.Test
 
             var results = await api.Completion
                 .Request("One Two Three Four Five Six Seven Eight Nine One Two Three Four Five Six Seven Eight")
-                .WithModel(ModelType.CurieText)
                 .WithTemperature(0.1)
                 .SetMaxTokens(5)
                 .ExecuteAsync();
@@ -54,49 +54,53 @@ namespace Microsoft.OpenAi.Test
 
 
         [Fact]
-        public void CompletionUsageDataWorks()
+        public async ValueTask CompletionUsageDataWorksAsync()
         {
-            var api = new OpenAI_API.OpenAIAPI();
+            var api = DiUtility.GetOpenAi();
+            Assert.NotNull(api.Completion);
 
-            Assert.IsNotNull(api.Completions);
-
-            var results = api.Completions.CreateCompletionsAsync(new CompletionRequest("One Two Three Four Five Six Seven Eight Nine One Two Three Four Five Six Seven Eight", model: Model.CurieText, temperature: 0.1, max_tokens: 5)).Result;
-            Assert.IsNotNull(results);
-            Assert.IsNotNull(results.Usage);
-            Assert.Greater(results.Usage.PromptTokens, 15);
-            Assert.Greater(results.Usage.CompletionTokens, 0);
-            Assert.GreaterOrEqual(results.Usage.TotalTokens, results.Usage.PromptTokens + results.Usage.CompletionTokens);
+            var results = await api.Completion
+               .Request("One Two Three Four Five Six Seven Eight Nine One Two Three Four Five Six Seven Eight")
+               .WithModel(ModelType.CurieText)
+               .WithTemperature(0.1)
+               .SetMaxTokens(5)
+               .ExecuteAsync();
+            Assert.NotNull(results);
+            Assert.NotNull(results.Usage);
+            Assert.True(results.Usage.PromptTokens > 15);
+            Assert.True(results.Usage.CompletionTokens > 0);
+            Assert.True(results.Usage.TotalTokens >= results.Usage.PromptTokens + results.Usage.CompletionTokens);
         }
 
 
         [Fact]
         public async Task CreateCompletionAsync_MultiplePrompts_ShouldReturnResult()
         {
-            var api = new OpenAI_API.OpenAIAPI();
-
-            var completionReq = new CompletionRequest
+            var api = DiUtility.GetOpenAi();
+            Assert.NotNull(api.Completion);
+            List<CompletionResult> results = new();
+            await foreach(var x in api.Completion
+               .Request("Today is Monday, tomorrow is", "10 11 12 13 14")
+               .WithTemperature(0)
+               .SetMaxTokens(3)
+               .ExecuteAsStreamAsync())
             {
-                MultiplePrompts = new[]
-                {
-                    "Today is Monday, tomorrow is",
-                    "10 11 12 13 14"
-                },
-                Temperature = 0,
-                MaxTokens = 3
-            };
+                results.Add(x);
+            }
 
-            var results = await api.Completions.CreateCompletionsAsync(completionReq);
-            results.ShouldNotBeEmpty();
-            results.ShouldContainAStringStartingWith("tuesday", "completion should contain next day");
-            results.ShouldContainAStringStartingWith("15", "completion should contain next number");
+            Assert.NotEmpty(results);
+            Assert.True(results.First().Completions.Any(c => c.Text.Trim().ToLower().StartsWith("tuesday")));
+            Assert.True(results.Last().Completions.Any(c => c.Text.Trim().ToLower().StartsWith("15")));
         }
 
 
-        [TestCase(-0.2)]
-        [TestCase(3)]
+        [Theory]
+        [InlineData(-0.2)]
+        [InlineData(3)]
         public void CreateCompletionAsync_ShouldNotAllowTemperatureOutside01(double temperature)
         {
-            var api = new OpenAI_API.OpenAIAPI();
+            var api = DiUtility.GetOpenAi();
+            Assert.NotNull(api.Completion);
 
             var completionReq = new CompletionRequest
             {
@@ -111,12 +115,14 @@ namespace Microsoft.OpenAi.Test
                 .Where(exc => exc.Message.Contains("temperature"));
         }
 
-        [TestCase(1.8)]
-        [TestCase(1.9)]
-        [TestCase(2.0)]
+        [Theory]
+        [InlineData(1.8)]
+        [InlineData(1.9)]
+        [InlineData(2.0)]
         public async Task ShouldBeMoreCreativeWithHighTemperature(double temperature)
         {
-            var api = new OpenAI_API.OpenAIAPI();
+            var api = DiUtility.GetOpenAi();
+            Assert.NotNull(api.Completion);
 
             var completionReq = new CompletionRequest
             {
@@ -130,9 +136,9 @@ namespace Microsoft.OpenAi.Test
             results.Completions.Count.Should().Be(5, "completion count should be the default");
             results.Completions.Distinct().Count().Should().Be(results.Completions.Count);
         }
-
-        [TestCase(0.05)]
-        [TestCase(0.1)]
+        [Theory]
+        [InlineData(0.05)]
+        [InlineData(0.1)]
         public async Task CreateCompletionAsync_ShouldGetSomeResultsWithVariousTopPValues(double topP)
         {
             var api = new OpenAI_API.OpenAIAPI();
@@ -150,10 +156,11 @@ namespace Microsoft.OpenAi.Test
             results.Completions.Count.Should().Be(5, "completion count should be the default");
         }
 
-        //[TestCase(-0.5)]  OpenAI returns a 500 error, is this supposed to work?
-        [TestCase(0.0)]
-        [TestCase(0.5)]
-        [TestCase(1.0)]
+        [Theory]
+        [InlineData(-0.5)]
+        [InlineData(0.0)]
+        [InlineData(0.5)]
+        [InlineData(1.0)]
         public async Task CreateCompletionAsync_ShouldReturnSomeResultsForPresencePenalty(double presencePenalty)
         {
             var api = new OpenAI_API.OpenAIAPI();
@@ -171,10 +178,11 @@ namespace Microsoft.OpenAi.Test
             results.Completions.Count.Should().Be(5, "completion count should be the default");
         }
 
-        //[TestCase(-0.5)]  OpenAI returns a 500 error, is this supposed to work?
-        [TestCase(0.0)]
-        [TestCase(0.5)]
-        [TestCase(1.0)]
+        [Theory]
+        [InlineData(-0.5)]
+        [InlineData(0.0)]
+        [InlineData(0.5)]
+        [InlineData(1.0)]
         public async Task CreateCompletionAsync_ShouldReturnSomeResultsForFrequencyPenalty(double frequencyPenalty)
         {
             var api = new OpenAI_API.OpenAIAPI();
@@ -209,10 +217,10 @@ namespace Microsoft.OpenAi.Test
             results.ShouldNotBeEmpty();
             results.Completions.Count.Should().Be(5, "completion count should be the default");
         }
-
-        [TestCase(1)]
-        [TestCase(2)]
-        [TestCase(5)]
+        [Theory]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(5)]
         public async Task CreateCompletionAsync_ShouldAlsoReturnLogProps(int logProps)
         {
             var api = new OpenAI_API.OpenAIAPI();
@@ -251,9 +259,9 @@ namespace Microsoft.OpenAi.Test
             results.ShouldNotBeEmpty();
             results.Completions.Should().OnlyContain(c => c.Text.StartsWith(completionReq.Prompt), "Echo should get the prompt back");
         }
-
-        [TestCase("Thursday")]
-        [TestCase("Friday")]
+        [Theory]
+        [InlineData("Thursday")]
+        [InlineData("Friday")]
         public async Task CreateCompletionAsync_ShouldStopOnStopSequence(string stopSeq)
         {
             var api = new OpenAI_API.OpenAIAPI();
@@ -307,9 +315,9 @@ namespace Microsoft.OpenAi.Test
                     .Excluding(o => o.RequestId)
             );
         }
-
-        [TestCase(5, 3)]
-        [TestCase(7, 2)]
+        [Theory]
+        [InlineData(5, 3)]
+        [InlineData(7, 2)]
         public async Task StreamCompletionAsync_ShouldStreamIndexAndData(int maxTokens, int numOutputs)
         {
             var api = new OpenAI_API.OpenAIAPI();
@@ -339,9 +347,9 @@ namespace Microsoft.OpenAi.Test
             streamIndexes.Count.Should().Be(expectedCount);
             completionResults.Count.Should().Be(expectedCount);
         }
-
-        [TestCase(5, 3)]
-        [TestCase(7, 2)]
+        [Theory]
+        [InlineData(5, 3)]
+        [InlineData(7, 2)]
         public async Task StreamCompletionAsync_ShouldStreamData(int maxTokens, int numOutputs)
         {
             var api = new OpenAI_API.OpenAIAPI();
@@ -368,9 +376,9 @@ namespace Microsoft.OpenAi.Test
             int expectedCount = maxTokens * numOutputs;
             completionResults.Count.Should().Be(expectedCount);
         }
-
-        [TestCase(5, 3)]
-        [TestCase(7, 2)]
+        [Theory]
+        [InlineData(5, 3)]
+        [InlineData(7, 2)]
         public async Task StreamCompletionEnumerableAsync_ShouldStreamData(int maxTokens, int numOutputs)
         {
             var api = new OpenAI_API.OpenAIAPI();
@@ -397,7 +405,7 @@ namespace Microsoft.OpenAi.Test
             int expectedCount = maxTokens * numOutputs;
             completionResults.Count.Should().Be(expectedCount);
         }
-
+        [Theory]
         [Fact]
         public async Task StreamCompletionEnumerableAsync_MultipleParamShouldReturnTheSameDataAsSingleParamVersion()
         {

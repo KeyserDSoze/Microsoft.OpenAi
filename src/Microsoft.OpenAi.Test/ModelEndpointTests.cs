@@ -60,11 +60,11 @@ namespace Microsoft.OpenAi.Test
 				.ThrowAsync<AuthenticationException>()
 				.Where(exc => exc.Message.Contains("Incorrect API key provided"));
 		}
-
-		[TestCase("ada")]
-		[TestCase("babbage")]
-		[TestCase("curie")]
-		[TestCase("davinci")]
+        [Theory]
+        [InlineData("ada")]
+		[InlineData("babbage")]
+		[InlineData("curie")]
+		[InlineData("davinci")]
 		public async Task RetrieveEngineDetailsAsync_ShouldRetrieveEngineDetails(string modelId)
 		{
 			var api = new OpenAI_API.OpenAIAPI();
