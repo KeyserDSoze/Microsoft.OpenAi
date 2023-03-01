@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Microsoft.OpenAi.Test
@@ -7,55 +8,55 @@ namespace Microsoft.OpenAi.Test
     public class EmbeddingEndpointTests
     {
         [Fact]
-        public void GetBasicEmbedding()
+        public async ValueTask GetBasicEmbeddingAsync()
         {
-            var api = new OpenAI_API.OpenAIAPI();
+            var api = DiUtility.GetOpenAi();
 
-            Assert.IsNotNull(api.Embeddings);
+            Assert.NotNull(api.Embedding);
 
-            var results = api.Embeddings.CreateEmbeddingAsync(new EmbeddingRequest(Model.AdaTextEmbedding, "A test text for embedding")).Result;
-            Assert.IsNotNull(results);
+            var results = await api.Embedding.Request("A test text for embedding").ExecuteAsync();
+            Assert.NotNull(results);
             if (results.CreatedUnixTime.HasValue)
             {
-                Assert.NotZero(results.CreatedUnixTime.Value);
+                Assert.True(results.CreatedUnixTime.Value != 0);
                 Assert.NotNull(results.Created);
-                Assert.Greater(results.Created.Value, new DateTime(2018, 1, 1));
-                Assert.Less(results.Created.Value, DateTime.Now.AddDays(1));
+                Assert.True(results.Created.Value > new DateTime(2018, 1, 1));
+                Assert.True(results.Created.Value < DateTime.Now.AddDays(1));
             }
             else
             {
                 Assert.Null(results.Created);
             }
             Assert.NotNull(results.Object);
-            Assert.NotZero(results.Data.Count);
-            Assert.That(results.Data.First().Embedding.Length == 1536);
+            Assert.True(results.Data.Count != 0);
+            Assert.True(results.Data.First().Embedding.Length == 1536);
         }
 
         [Fact]
-        public void ReturnedUsage()
+        public async ValueTask ReturnedUsageAsync()
         {
-            var api = new OpenAI_API.OpenAIAPI();
+            var api = DiUtility.GetOpenAi();
 
-            Assert.IsNotNull(api.Embeddings);
+            Assert.NotNull(api.Embedding);
 
-            var results = api.Embeddings.CreateEmbeddingAsync(new EmbeddingRequest(Model.AdaTextEmbedding, "A test text for embedding")).Result;
-            Assert.IsNotNull(results);
+            var results = await api.Embedding.Request("A test text for embedding").ExecuteAsync();
+            Assert.NotNull(results);
 
-            Assert.IsNotNull(results.Usage);
-            Assert.GreaterOrEqual(results.Usage.PromptTokens, 5);
-            Assert.GreaterOrEqual(results.Usage.TotalTokens, results.Usage.PromptTokens);
+            Assert.NotNull(results.Usage);
+            Assert.True(results.Usage.PromptTokens >= 5);
+            Assert.True(results.Usage.TotalTokens >= results.Usage.PromptTokens);
         }
 
         [Fact]
-        public void GetSimpleEmbedding()
+        public async ValueTask GetSimpleEmbeddingAsync()
         {
-            var api = new OpenAI_API.OpenAIAPI();
+            var api = DiUtility.GetOpenAi();
 
-            Assert.IsNotNull(api.Embeddings);
+            Assert.NotNull(api.Embedding);
 
-            var results = api.Embeddings.GetEmbeddingsAsync("A test text for embedding").Result;
-            Assert.IsNotNull(results);
-            Assert.That(results.Length == 1536);
+            var results = await api.Embedding.Request("A test text for embedding").ExecuteAsync();
+            Assert.NotNull(results);
+            Assert.True(results.Data.Count == 1536);
         }
     }
 }

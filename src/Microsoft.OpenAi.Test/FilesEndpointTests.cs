@@ -11,9 +11,9 @@ namespace Microsoft.OpenAi.Test
         [Order(1)]
         public async Task UploadFile()
         {
-            var api = new OpenAI_API.OpenAIAPI();
-            var response = await api.Files.UploadFileAsync("fine-tuning-data.jsonl");
-            Assert.IsNotNull(response);
+            var api = DiUtility.GetOpenAi();
+            var response = await api.Files.UploadFileAsync("data-test-file.jsonl");
+            Assert.NotNull(response);
             Assert.IsTrue(response.Id.Length > 0);
             Assert.IsTrue(response.Object == "file");
             Assert.IsTrue(response.Bytes > 0);
@@ -27,12 +27,12 @@ namespace Microsoft.OpenAi.Test
         [Order(2)]
         public async Task ListFiles()
         {
-            var api = new OpenAI_API.OpenAIAPI();
+            var api = DiUtility.GetOpenAi();
             var response = await api.Files.GetFilesAsync();
 
             foreach (var file in response)
             {
-                Assert.IsNotNull(file);
+                Assert.NotNull(file);
                 Assert.IsTrue(file.Id.Length > 0);
             }
         }
@@ -42,17 +42,17 @@ namespace Microsoft.OpenAi.Test
         [Order(3)]
         public async Task GetFile()
         {
-            var api = new OpenAI_API.OpenAIAPI();
+            var api = DiUtility.GetOpenAi();
             var response = await api.Files.GetFilesAsync();
             foreach (var file in response)
             {
-                Assert.IsNotNull(file);
+                Assert.NotNull(file);
                 Assert.IsTrue(file.Id.Length > 0);
                 string id = file.Id;
                 if (file.Name == "fine-tuning-data.jsonl")
                 {
                     var fileResponse = await api.Files.GetFileAsync(file.Id);
-                    Assert.IsNotNull(fileResponse);
+                    Assert.NotNull(fileResponse);
                     Assert.IsTrue(fileResponse.Id == id);
                 }
             }
@@ -62,16 +62,16 @@ namespace Microsoft.OpenAi.Test
         [Order(4)]
         public async Task DeleteFiles()
         {
-            var api = new OpenAI_API.OpenAIAPI();
+            var api = DiUtility.GetOpenAi();
             var response = await api.Files.GetFilesAsync();
             foreach (var file in response)
             {
-                Assert.IsNotNull(file);
+                Assert.NotNull(file);
                 Assert.IsTrue(file.Id.Length > 0);
                 if (file.Name == "fine-tuning-data.jsonl")
                 {
                     var deleteResponse = await api.Files.DeleteFileAsync(file.Id);
-                    Assert.IsNotNull(deleteResponse);
+                    Assert.NotNull(deleteResponse);
                     Assert.IsTrue(deleteResponse.Deleted);
                 }
             }

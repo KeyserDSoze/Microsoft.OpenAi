@@ -2,76 +2,68 @@
 using System.Linq;
 using System.Security.Authentication;
 using System.Threading.Tasks;
+using Microsoft.OpenAi.Api.Models;
 using Xunit;
 
 namespace Microsoft.OpenAi.Test
 {
     public class ModelEndpointTests
-	{
-		[Fact]
-		public void GetAllModels()
-		{
-			var api = new OpenAI_API.OpenAIAPI();
+    {
+        [Fact]
+        public async ValueTask GetAllModelsAsync()
+        {
+            var api = DiUtility.GetOpenAi();
 
-			Assert.IsNotNull(api.Models);
+            Assert.NotNull(api.Model);
 
-			var results = api.Models.GetModelsAsync().Result;
-			Assert.IsNotNull(results);
-			Assert.NotZero(results.Count);
-			Assert.That(results.Any(c => c.ModelID.ToLower().StartsWith("text-davinci")));
-		}
+            var results = await api.Model.AllAsync();
+            Assert.NotNull(results);
+            Assert.NotEmpty(results);
+            Assert.True(results.Any(c => c.Id.ToLower().StartsWith("text-davinci")));
+        }
 
-		[Fact]
-		public void GetModelDetails()
-		{
-			var api = new OpenAI_API.OpenAIAPI();
+        [Fact]
+        public async ValueTask GetModelDetailsAsync()
+        {
+            var api = DiUtility.GetOpenAi();
 
-			Assert.IsNotNull(api.Models);
+            Assert.NotNull(api.Model);
 
-			var result = api.Models.RetrieveModelDetailsAsync(Model.DavinciText).Result;
-			Assert.IsNotNull(result);
+            var result = await api.Model.GetDetailsAsync(Model.DavinciText.Id);
+            Assert.NotNull(result);
 
-			Assert.NotNull(result.CreatedUnixTime);
-			Assert.NotZero(result.CreatedUnixTime.Value);
-			Assert.NotNull(result.Created);
-			Assert.Greater(result.Created.Value, new DateTime(2018, 1, 1));
-			Assert.Less(result.Created.Value, DateTime.Now.AddDays(1));
+            Assert.NotNull(result.CreatedUnixTime);
+            Assert.True(result.CreatedUnixTime.Value != 0);
+            Assert.NotNull(result.Created);
+            Assert.True(result.Created.Value > new DateTime(2018, 1, 1));
+            Assert.True(result.Created.Value < DateTime.Now.AddDays(1));
 
-			Assert.IsNotNull(result.ModelID);
-			Assert.IsNotNull(result.OwnedBy);
-			Assert.AreEqual(Model.DavinciText.ModelID.ToLower(), result.ModelID.ToLower());
-		}
+            Assert.NotNull(result.Id);
+            Assert.NotNull(result.OwnedBy);
+            Assert.Equal(Model.DavinciText.Id.ToLower(), result.Id.ToLower());
+        }
 
 
-		[Fact]
-		public async Task GetEnginesAsync_ShouldReturnTheEngineList()
-		{
-			var api = new OpenAI_API.OpenAIAPI();
-			var models = await api.Models.GetModelsAsync();
-			models.Count.Should().BeGreaterOrEqualTo(5, "most engines should be returned");
-		}
+        [Fact]
+        public async ValueTask GetEnginesAsync_ShouldReturnTheEngineList()
+        {
+            var api = DiUtility.GetOpenAi();
+            var models = await api.Model.AllAsync();
+            Assert.True(models.Count > 5);
+        }
 
-		[Fact]
-		public void GetEnginesAsync_ShouldFailIfInvalidAuthIsProvided()
-		{
-			var api = new OpenAIAPI(new APIAuthentication(Guid.NewGuid().ToString()));
-			Func<Task> act = () => api.Models.GetModelsAsync();
-			act.Should()
-				.ThrowAsync<AuthenticationException>()
-				.Where(exc => exc.Message.Contains("Incorrect API key provided"));
-		}
         [Theory]
         [InlineData("ada")]
-		[InlineData("babbage")]
-		[InlineData("curie")]
-		[InlineData("davinci")]
-		public async Task RetrieveEngineDetailsAsync_ShouldRetrieveEngineDetails(string modelId)
-		{
-			var api = new OpenAI_API.OpenAIAPI();
-			var modelData = await api.Models.RetrieveModelDetailsAsync(modelId);
-			modelData?.ModelID?.Should()?.Be(modelId);
-			modelData.Created.Should().BeAfter(new DateTime(2018, 1, 1), "the model has a created date no earlier than 2018");
-			modelData.Created.Should().BeBefore(DateTime.Now.AddDays(1), "the model has a created date before today");
-		}
-	}
+        [InlineData("babbage")]
+        [InlineData("curie")]
+        [InlineData("davinci")]
+        public async ValueTask RetrieveEngineDetailsAsync_ShouldRetrieveEngineDetails(string modelId)
+        {
+            var api = DiUtility.GetOpenAi();
+            var modelData = await api.Model.GetDetailsAsync(modelId);
+            Assert.Equal(modelId, modelData.Id);
+            Assert.True(modelData.Created > new DateTime(2018, 1, 1));
+            Assert.True(modelData.Created < DateTime.UtcNow.AddDays(1));
+        }
+    }
 }

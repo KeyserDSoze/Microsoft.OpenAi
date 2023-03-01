@@ -27,7 +27,7 @@
     </ItemGroup>
 
     <ItemGroup>
-        <None Update="fine-tuning-data.jsonl">
+        <None Update="data-test-file.jsonl">
             <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
         </None>
     </ItemGroup>

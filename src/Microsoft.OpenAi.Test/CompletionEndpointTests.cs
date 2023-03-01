@@ -141,7 +141,7 @@ namespace Microsoft.OpenAi.Test
         [InlineData(0.1)]
         public async Task CreateCompletionAsync_ShouldGetSomeResultsWithVariousTopPValues(double topP)
         {
-            var api = new OpenAI_API.OpenAIAPI();
+            var api = DiUtility.GetOpenAi();
 
             var completionReq = new CompletionRequest
             {
@@ -163,7 +163,7 @@ namespace Microsoft.OpenAi.Test
         [InlineData(1.0)]
         public async Task CreateCompletionAsync_ShouldReturnSomeResultsForPresencePenalty(double presencePenalty)
         {
-            var api = new OpenAI_API.OpenAIAPI();
+            var api = DiUtility.GetOpenAi();
 
             var completionReq = new CompletionRequest
             {
@@ -185,7 +185,7 @@ namespace Microsoft.OpenAi.Test
         [InlineData(1.0)]
         public async Task CreateCompletionAsync_ShouldReturnSomeResultsForFrequencyPenalty(double frequencyPenalty)
         {
-            var api = new OpenAI_API.OpenAIAPI();
+            var api = DiUtility.GetOpenAi();
 
             var completionReq = new CompletionRequest
             {
@@ -203,7 +203,7 @@ namespace Microsoft.OpenAi.Test
         [Fact]
         public async Task CreateCompletionAsync_ShouldWorkForBiggerNumberOfCompletions()
         {
-            var api = new OpenAI_API.OpenAIAPI();
+            var api = DiUtility.GetOpenAi();
 
             var completionReq = new CompletionRequest
             {
@@ -223,7 +223,7 @@ namespace Microsoft.OpenAi.Test
         [InlineData(5)]
         public async Task CreateCompletionAsync_ShouldAlsoReturnLogProps(int logProps)
         {
-            var api = new OpenAI_API.OpenAIAPI();
+            var api = DiUtility.GetOpenAi();
 
             var completionReq = new CompletionRequest
             {
@@ -245,7 +245,7 @@ namespace Microsoft.OpenAi.Test
         [Fact]
         public async Task CreateCompletionAsync_Echo_ShouldReturnTheInput()
         {
-            var api = new OpenAI_API.OpenAIAPI();
+            var api = DiUtility.GetOpenAi();
 
             var completionReq = new CompletionRequest
             {
@@ -264,7 +264,7 @@ namespace Microsoft.OpenAi.Test
         [InlineData("Friday")]
         public async Task CreateCompletionAsync_ShouldStopOnStopSequence(string stopSeq)
         {
-            var api = new OpenAI_API.OpenAIAPI();
+            var api = DiUtility.GetOpenAi();
 
             var completionReq = new CompletionRequest
             {
@@ -284,7 +284,7 @@ namespace Microsoft.OpenAi.Test
         [Fact]
         public async Task CreateCompletionAsync_MultipleParamShouldReturnTheSameDataAsSingleParamVersion()
         {
-            var api = new OpenAI_API.OpenAIAPI();
+            var api = DiUtility.GetOpenAi();
 
             var r = new CompletionRequest
             {
@@ -320,7 +320,7 @@ namespace Microsoft.OpenAi.Test
         [InlineData(7, 2)]
         public async Task StreamCompletionAsync_ShouldStreamIndexAndData(int maxTokens, int numOutputs)
         {
-            var api = new OpenAI_API.OpenAIAPI();
+            var api = DiUtility.GetOpenAi();
 
             var completionRequest = new CompletionRequest
             {
@@ -352,7 +352,7 @@ namespace Microsoft.OpenAi.Test
         [InlineData(7, 2)]
         public async Task StreamCompletionAsync_ShouldStreamData(int maxTokens, int numOutputs)
         {
-            var api = new OpenAI_API.OpenAIAPI();
+            var api = DiUtility.GetOpenAi();
 
             var completionRequest = new CompletionRequest
             {
@@ -381,7 +381,7 @@ namespace Microsoft.OpenAi.Test
         [InlineData(7, 2)]
         public async Task StreamCompletionEnumerableAsync_ShouldStreamData(int maxTokens, int numOutputs)
         {
-            var api = new OpenAI_API.OpenAIAPI();
+            var api = DiUtility.GetOpenAi();
 
             var completionRequest = new CompletionRequest
             {
@@ -409,7 +409,7 @@ namespace Microsoft.OpenAi.Test
         [Fact]
         public async Task StreamCompletionEnumerableAsync_MultipleParamShouldReturnTheSameDataAsSingleParamVersion()
         {
-            var api = new OpenAI_API.OpenAIAPI();
+            var api = DiUtility.GetOpenAi();
 
             var r = new CompletionRequest
             {
