@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Microsoft.OpenAi.Api.Models
+namespace Azure.Ai.OpenAi.Models
 {
     /// <summary>
     /// Permissions for using the model

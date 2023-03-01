@@ -1,11 +1,11 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Microsoft.OpenAi.Api.Completions
+namespace Azure.Ai.OpenAi.Completions
 {
     /// <summary>
     /// Represents a result from calling the Completion API
     /// </summary>
-    public class CompletionResult : ApiResultBase
+    public class CompletionResult : ApiBaseResponse
     {
         /// <summary>
         /// The identifier of the result, which may be used during troubleshooting

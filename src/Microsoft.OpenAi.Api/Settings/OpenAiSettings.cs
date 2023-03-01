@@ -1,6 +1,6 @@
 ﻿using Polly;
 
-namespace Microsoft.OpenAi.Api
+namespace Azure.Ai.OpenAi
 {
     public sealed class OpenAiSettings
     {

@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
-using Microsoft.OpenAi.Api.Models;
+using Azure.Ai.OpenAi.Models;
 
-namespace Microsoft.OpenAi.Api
+namespace Azure.Ai.OpenAi
 {
     internal sealed class OpenAiModelApi : IOpenAiModelApi
     {
@@ -17,24 +17,23 @@ namespace Microsoft.OpenAi.Api
         /// </summary>
         /// <param name="id">The id/name of the model to get more details about</param>
         /// <returns>Asynchronously returns the <see cref="Model"/> with all available properties</returns>
-        public ValueTask<Model> GetDetailsAsync(string id)
-            => _client.ExecuteAsync<Model>($"{_configuration.ModelUri}/{id}", null);
+        public ValueTask<Model> GetDetailsAsync(string id, CancellationToken cancellationToken = default)
+            => _client.ExecuteAsync<Model>($"{_configuration.ModelUri}/{id}", null, cancellationToken);
         /// <summary>
         /// List all models via the API
         /// </summary>
         /// <returns>Asynchronously returns the list of all <see cref="Model"/>s</returns>
-        public async Task<List<Model>> AllAsync()
+        public async Task<List<Model>> AllAsync(CancellationToken cancellationToken = default)
         {
-            var response = await _client.ExecuteAsync<JsonHelperRoot>(_configuration.ModelUri, null);
-            return response.Data;
+            var response = await _client.ExecuteAsync<JsonHelperRoot>(_configuration.ModelUri, null, cancellationToken);
+            return response.Data!;
         }
-        private sealed class JsonHelperRoot : ApiResultBase
+        private sealed class JsonHelperRoot : ApiBaseResponse
         {
             [JsonPropertyName("data")]
-            public List<Model> Data { get; set; }
+            public List<Model>? Data { get; set; }
             [JsonPropertyName("object")]
-            public string Object { get; set; }
-
+            public string? Object { get; set; }
         }
     }
 }

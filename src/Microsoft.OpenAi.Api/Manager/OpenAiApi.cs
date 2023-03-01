@@ -1,4 +1,4 @@
-﻿namespace Microsoft.OpenAi.Api
+﻿namespace Azure.Ai.OpenAi
 {
     internal sealed class OpenAiApi : IOpenAiApi
     {

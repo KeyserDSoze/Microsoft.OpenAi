@@ -2,7 +2,7 @@
 using System.Linq;
 using System.Security.Authentication;
 using System.Threading.Tasks;
-using Microsoft.OpenAi.Api.Models;
+using Azure.Ai.OpenAi.Models;
 using Xunit;
 
 namespace Microsoft.OpenAi.Test

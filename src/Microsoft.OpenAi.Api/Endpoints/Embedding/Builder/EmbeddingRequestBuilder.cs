@@ -1,7 +1,7 @@
-﻿using Microsoft.OpenAi.Api.Embedding;
-using Microsoft.OpenAi.Api.Models;
+﻿using Azure.Ai.OpenAi.Embedding;
+using Azure.Ai.OpenAi.Models;
 
-namespace Microsoft.OpenAi.Api
+namespace Azure.Ai.OpenAi
 {
     public sealed class EmbeddingRequestBuilder
     {
@@ -22,8 +22,8 @@ namespace Microsoft.OpenAi.Api
         /// Specifies where the results should stream and be returned at one time.
         /// </summary>
         /// <returns>Builder</returns>
-        public ValueTask<EmbeddingResult> ExecuteAsync()
-            => _client.ExecuteAsync<EmbeddingResult>(_configuration.EmbeddingUri, _embeddingRequest);
+        public ValueTask<EmbeddingResult> ExecuteAsync(CancellationToken cancellationToken = default)
+            => _client.ExecuteAsync<EmbeddingResult>(_configuration.EmbeddingUri, _embeddingRequest, cancellationToken);
         /// <summary>
         /// ID of the model to use.
         /// </summary>

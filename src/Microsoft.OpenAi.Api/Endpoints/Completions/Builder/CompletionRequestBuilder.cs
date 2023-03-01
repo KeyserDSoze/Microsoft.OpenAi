@@ -1,7 +1,7 @@
-﻿using Microsoft.OpenAi.Api.Completions;
-using Microsoft.OpenAi.Api.Models;
+﻿using Azure.Ai.OpenAi.Completions;
+using Azure.Ai.OpenAi.Models;
 
-namespace Microsoft.OpenAi.Api
+namespace Azure.Ai.OpenAi
 {
     public sealed class CompletionRequestBuilder
     {
@@ -22,20 +22,20 @@ namespace Microsoft.OpenAi.Api
         /// Specifies where the results should stream and be returned at one time.
         /// </summary>
         /// <returns>Builder</returns>
-        public ValueTask<CompletionResult> ExecuteAsync()
+        public ValueTask<CompletionResult> ExecuteAsync(CancellationToken cancellationToken = default)
         {
             _completionRequest.Stream = false;
-            return _client.ExecuteAsync<CompletionResult>(_configuration.CompletionUri, _completionRequest);
+            return _client.ExecuteAsync<CompletionResult>(_configuration.CompletionUri, _completionRequest, cancellationToken);
         }
         /// <summary>
         /// Specifies where the results should stream and be returned at one time.
         /// </summary>
         /// <returns>Builder</returns>
-        public IAsyncEnumerable<CompletionResult> ExecuteAsStreamAsync()
+        public IAsyncEnumerable<CompletionResult> ExecuteAsStreamAsync(CancellationToken cancellationToken = default)
         {
             _completionRequest.Stream = true;
             _completionRequest.BestOf = null;
-            return _client.ExecuteStreamAsync<CompletionResult>(_configuration.CompletionUri, _completionRequest);
+            return _client.ExecuteStreamAsync<CompletionResult>(_configuration.CompletionUri, _completionRequest, cancellationToken);
         }
         /// <summary>
         /// Add further prompt to the request.

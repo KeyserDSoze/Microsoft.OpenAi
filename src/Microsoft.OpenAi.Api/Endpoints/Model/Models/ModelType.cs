@@ -1,4 +1,4 @@
-﻿namespace Microsoft.OpenAi.Api.Models
+﻿namespace Azure.Ai.OpenAi.Models
 {
     public enum ModelType
     {
@@ -9,6 +9,8 @@
         DavinciText,
         CushmanCode,
         DavinciCode,
-        AdaTextEmbedding
+        AdaTextEmbedding,
+        TextModerationStable,
+        TextModerationLatest
     }
 }

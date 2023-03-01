@@ -23,6 +23,7 @@
     </ItemGroup>
 
     <ItemGroup>
+        <ProjectReference Include="..\Azure.Ai.OpenAi\Azure.Ai.OpenAi.csproj" />
         <ProjectReference Include="..\Microsoft.OpenAi.Api\Microsoft.OpenAi.Api.csproj" />
     </ItemGroup>
 

@@ -1,11 +1,11 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Microsoft.OpenAi.Api.Files
+namespace Azure.Ai.OpenAi.Files
 {
     /// <summary>
     /// Represents a single file used with the OpenAI Files endpoint.  Files are used to upload and manage documents that can be used with features like Fine-tuning.
     /// </summary>
-    public sealed class FileResult : ApiResultBase
+    public sealed class FileResult : ApiBaseResponse
     {
         /// <summary>
         /// Unique id for this file, so that it can be referenced in other operations

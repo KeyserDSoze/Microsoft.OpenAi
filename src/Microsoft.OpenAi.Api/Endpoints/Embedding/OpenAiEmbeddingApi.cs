@@ -1,6 +1,6 @@
-﻿using Microsoft.OpenAi.Api.Completions;
+﻿using Azure.Ai.OpenAi.Completions;
 
-namespace Microsoft.OpenAi.Api
+namespace Azure.Ai.OpenAi
 {
     internal sealed class OpenAiEmbeddingApi : IOpenAiEmbeddingApi
     {

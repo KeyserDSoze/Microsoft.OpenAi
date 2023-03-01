@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Microsoft.OpenAi.Api.Embedding
+namespace Azure.Ai.OpenAi.Embedding
 {
     internal sealed class EmbeddingRequest
     {

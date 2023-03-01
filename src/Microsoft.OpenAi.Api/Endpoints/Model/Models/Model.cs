@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Microsoft.OpenAi.Api.Models
+namespace Azure.Ai.OpenAi.Models
 {
     /// <summary>
     /// Represents a language model
@@ -85,6 +85,8 @@ namespace Microsoft.OpenAi.Api.Models
         /// OpenAI offers one second-generation embedding model for use with the embeddings API endpoint.
         /// </summary>
         public static Model AdaTextEmbedding { get; } = new Model("text-embedding-ada-002") { OwnedBy = "openai" };
+        public static Model TextModerationStable { get; } = new Model("text-moderation-stable") { OwnedBy = "openai" };
+        public static Model TextModerationLatest { get; } = new Model("text-moderation-latest") { OwnedBy = "openai" };
         internal static Model FromModelType(ModelType type)
         {
             switch (type)
@@ -105,6 +107,10 @@ namespace Microsoft.OpenAi.Api.Models
                     return CurieText;
                 case ModelType.AdaText:
                     return AdaText;
+                case ModelType.TextModerationStable:
+                    return TextModerationStable;
+                case ModelType.TextModerationLatest:
+                    return TextModerationLatest;
                 default:
                     return DefaultModel;
             }

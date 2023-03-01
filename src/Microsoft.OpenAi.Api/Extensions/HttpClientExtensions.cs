@@ -1,13 +1,12 @@
-﻿using System;
-using System.Diagnostics;
+﻿using System.Diagnostics;
 using System.Text;
 using System.Text.Json;
 
-namespace Microsoft.OpenAi.Api
+namespace Azure.Ai.OpenAi
 {
     public static class HttpClientExtensions
     {
-        internal static async Task<HttpResponseMessage> PrivatedExecuteAsync(this HttpClient client, string url, object? message, bool isStreaming, bool isDelete)
+        internal static async Task<HttpResponseMessage> PrivatedExecuteAsync(this HttpClient client, string url, object? message, bool isStreaming, bool isDelete, CancellationToken cancellationToken)
         {
             var request = new HttpRequestMessage(isDelete ? HttpMethod.Delete : (message != null ? HttpMethod.Post : HttpMethod.Get), url);
             if (message != null)
@@ -23,7 +22,7 @@ namespace Microsoft.OpenAi.Api
                     request.Content = stringContent;
                 }
             }
-            var response = await client.SendAsync(request, isStreaming ? HttpCompletionOption.ResponseHeadersRead : HttpCompletionOption.ResponseContentRead);
+            var response = await client.SendAsync(request, isStreaming ? HttpCompletionOption.ResponseHeadersRead : HttpCompletionOption.ResponseContentRead, cancellationToken);
             if (response.IsSuccessStatusCode)
             {
                 return response;
@@ -33,23 +32,23 @@ namespace Microsoft.OpenAi.Api
                 throw new HttpRequestException(await response.Content.ReadAsStringAsync());
             }
         }
-        internal static async ValueTask<TResponse> DeleteAsync<TResponse>(this HttpClient client, string url, object? message)
+        internal static async ValueTask<TResponse> DeleteAsync<TResponse>(this HttpClient client, string url, object? message, CancellationToken cancellationToken)
         {
-            var response = await client.PrivatedExecuteAsync(url, message, false, true);
+            var response = await client.PrivatedExecuteAsync(url, message, false, true, cancellationToken);
             var responseAsString = await response.Content.ReadAsStringAsync();
             return JsonSerializer.Deserialize<TResponse>(responseAsString)!;
         }
-        internal static async ValueTask<TResponse> ExecuteAsync<TResponse>(this HttpClient client, string url, object? message)
+        internal static async ValueTask<TResponse> ExecuteAsync<TResponse>(this HttpClient client, string url, object? message, CancellationToken cancellationToken)
         {
-            var response = await client.PrivatedExecuteAsync(url, message, false, false);
+            var response = await client.PrivatedExecuteAsync(url, message, false, false, cancellationToken);
             var responseAsString = await response.Content.ReadAsStringAsync();
             return JsonSerializer.Deserialize<TResponse>(responseAsString)!;
         }
         private const string StartingWith = "data: ";
         private const string Done = "[DONE]";
-        internal static async IAsyncEnumerable<TResponse> ExecuteStreamAsync<TResponse>(this HttpClient client, string url, object? message)
+        internal static async IAsyncEnumerable<TResponse> ExecuteStreamAsync<TResponse>(this HttpClient client, string url, object? message, CancellationToken cancellationToken)
         {
-            var response = await client.PrivatedExecuteAsync(url, message, true, false);
+            var response = await client.PrivatedExecuteAsync(url, message, true, false, cancellationToken);
             using var stream = await response.Content.ReadAsStreamAsync();
             using var reader = new StreamReader(stream);
             string line;
@@ -64,14 +63,14 @@ namespace Microsoft.OpenAi.Api
                 else if (!string.IsNullOrWhiteSpace(line))
                 {
                     var res = JsonSerializer.Deserialize<TResponse>(line);
-                    if (res is ApiResultBase apiResult)
+                    if (res is ApiBaseResponse apiResult)
                         apiResult.SetHeaders(response);
                     yield return res!;
                 }
             }
         }
         private static void SetHeaders<TResponse>(this TResponse result, HttpResponseMessage response)
-            where TResponse : ApiResultBase
+            where TResponse : ApiBaseResponse
         {
             try
             {

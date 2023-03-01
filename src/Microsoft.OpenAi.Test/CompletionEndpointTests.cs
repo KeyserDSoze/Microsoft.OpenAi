@@ -3,8 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Microsoft.OpenAi.Api.Completions;
-using Microsoft.OpenAi.Api.Models;
+using Azure.Ai.OpenAi.Completions;
+using Azure.Ai.OpenAi.Models;
 using Xunit;
 
 namespace Microsoft.OpenAi.Test

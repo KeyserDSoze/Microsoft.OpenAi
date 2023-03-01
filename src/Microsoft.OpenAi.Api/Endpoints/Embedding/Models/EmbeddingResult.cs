@@ -1,11 +1,11 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Microsoft.OpenAi.Api.Embedding
+namespace Azure.Ai.OpenAi.Embedding
 {
     /// <summary>
     /// Represents an embedding result returned by the Embedding API.  
     /// </summary>
-    public class EmbeddingResult : ApiResultBase
+    public class EmbeddingResult : ApiBaseResponse
     {
         /// <summary>
         /// List of results of the embedding

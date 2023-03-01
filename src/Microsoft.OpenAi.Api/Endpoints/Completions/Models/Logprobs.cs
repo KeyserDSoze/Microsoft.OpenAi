@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Microsoft.OpenAi.Api.Completions
+namespace Azure.Ai.OpenAi.Completions
 {
     public class Logprobs
 	{

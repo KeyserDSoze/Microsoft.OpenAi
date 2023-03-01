@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
-using Microsoft.OpenAi.Api.Files;
+using Azure.Ai.OpenAi.Files;
 
-namespace Microsoft.OpenAi.Api
+namespace Azure.Ai.OpenAi
 {
     internal sealed class OpenAiFileApi : IOpenAiFileApi
     {
@@ -17,9 +17,9 @@ namespace Microsoft.OpenAi.Api
         /// </summary>
         /// <returns></returns>
         /// <exception cref="HttpRequestException"></exception>
-        public async Task<List<FileResult>> AllAsync()
+        public async Task<List<FileResult>> AllAsync(CancellationToken cancellationToken = default)
         {
-            var response = await _client.ExecuteAsync<FilesDataHelper>(_configuration.FileUri, null);
+            var response = await _client.ExecuteAsync<FilesDataHelper>(_configuration.FileUri, null, cancellationToken);
             return response.Data;
         }
         /// <summary>
@@ -27,16 +27,16 @@ namespace Microsoft.OpenAi.Api
         /// </summary>
         /// <param name="fileId">The ID of the file to use for this request</param>
         /// <returns></returns>
-        public ValueTask<FileResult> GetAsync(string fileId)
-            => _client.ExecuteAsync<FileResult>($"{_configuration.FileUri}/{fileId}", null);
+        public ValueTask<FileResult> GetAsync(string fileId, CancellationToken cancellationToken = default)
+            => _client.ExecuteAsync<FileResult>($"{_configuration.FileUri}/{fileId}", null, cancellationToken);
         /// <summary>
         /// Returns the contents of the specific file as string
         /// </summary>
         /// <param name="fileId">The ID of the file to use for this request</param>
         /// <returns></returns>
-        public async Task<string> GetFileContentAsStringAsync(string fileId)
+        public async Task<string> GetFileContentAsStringAsync(string fileId, CancellationToken cancellationToken = default)
         {
-            var response = await _client.PrivatedExecuteAsync($"{_configuration.FileUri}/{fileId}/content", null, false, false);
+            var response = await _client.PrivatedExecuteAsync($"{_configuration.FileUri}/{fileId}/content", null, false, false, cancellationToken);
             return await response.Content.ReadAsStringAsync();
         }
         /// <summary>
@@ -44,8 +44,8 @@ namespace Microsoft.OpenAi.Api
         ///	</summary>
         ///	 <param name="fileId">The ID of the file to use for this request</param>
         /// <returns></returns>
-        public ValueTask<FileResult> DeleteAsync(string fileId)
-            => _client.DeleteAsync<FileResult>($"{_configuration.FileUri}/{fileId}", null);
+        public ValueTask<FileResult> DeleteAsync(string fileId, CancellationToken cancellationToken = default)
+            => _client.DeleteAsync<FileResult>($"{_configuration.FileUri}/{fileId}", null, cancellationToken);
         private const string Purpose = "purpose";
         private const string FileContent = "file";
         /// <summary>
@@ -53,7 +53,7 @@ namespace Microsoft.OpenAi.Api
         /// </summary>
         /// <param name="file">The stream for the file to use for this request</param>
         /// <param name="purpose">The intendend purpose of the uploaded documents. Use "fine-tune" for Fine-tuning. This allows us to validate the format of the uploaded file.</param>
-        public ValueTask<FileResult> UploadFileAsync(Stream file, string fileName, string purpose = "fine-tune")
+        public ValueTask<FileResult> UploadFileAsync(Stream file, string fileName, string purpose = "fine-tune", CancellationToken cancellationToken = default)
         {
             var memoryStream = new MemoryStream();
             file.CopyTo(memoryStream);
@@ -62,14 +62,14 @@ namespace Microsoft.OpenAi.Api
                 { new StringContent(purpose), Purpose },
                 { new ByteArrayContent(memoryStream.ToArray()), FileContent, fileName }
             };
-            return _client.ExecuteAsync<FileResult>(_configuration.FileUri, content);
+            return _client.ExecuteAsync<FileResult>(_configuration.FileUri, content, cancellationToken);
         }
-        private sealed class FilesDataHelper : ApiResultBase
+        private sealed class FilesDataHelper : ApiBaseResponse
         {
             [JsonPropertyName("data")]
             public List<FileResult> Data { get; set; }
             [JsonPropertyName("object")]
-            public string Obj { get; set; }
+            public string? Object { get; set; }
         }
     }
 }

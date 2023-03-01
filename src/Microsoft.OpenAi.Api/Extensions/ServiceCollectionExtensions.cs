@@ -1,4 +1,4 @@
-﻿using Microsoft.OpenAi.Api;
+﻿using Azure.Ai.OpenAi;
 using System;
 using System.Net.Http.Headers;
 using System.Text.Json.Serialization;
@@ -39,6 +39,8 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddScoped<IOpenAiEmbeddingApi, OpenAiEmbeddingApi>()
                 .AddScoped<IOpenAiFileApi, OpenAiFileApi>()
                 .AddScoped<IOpenAiModelApi, OpenAiModelApi>()
+                .AddScoped<IOpenAiModerationApi, OpenAiModerationApi>()
+                .AddScoped<IOpenAiImageApi, OpenAiImageApi>()
                 .AddScoped<IOpenAiCompletionApi, OpenAiCompletionApi>();
             return services;
         }

@@ -1,12 +1,12 @@
 ﻿using System.Text.Json.Serialization;
-using Microsoft.OpenAi.Api.Models;
+using Azure.Ai.OpenAi.Models;
 
-namespace Microsoft.OpenAi.Api
+namespace Azure.Ai.OpenAi
 {
     /// <summary>
     /// Represents a result from calling the OpenAI API, with all the common metadata returned from every endpoint
     /// </summary>
-    public abstract class ApiResultBase
+    public abstract class ApiBaseResponse
     {
         /// The time when the result was generated
         [JsonIgnore]
