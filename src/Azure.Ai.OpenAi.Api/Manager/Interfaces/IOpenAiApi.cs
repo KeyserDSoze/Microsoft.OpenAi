@@ -2,9 +2,11 @@
 {
     public interface IOpenAiApi
     {
-        IOpenAiCompletionApi Completion { get; }
-        IOpenAiEmbeddingApi Embedding { get; }
         IOpenAiModelApi Model { get; }
+        IOpenAiCompletionApi Completion { get; }
+        IOpenAiImageApi Image { get; }
+        IOpenAiEmbeddingApi Embedding { get; }
         IOpenAiFileApi File { get; }
+        IOpenAiModerationApi Moderation { get; }
     }
 }

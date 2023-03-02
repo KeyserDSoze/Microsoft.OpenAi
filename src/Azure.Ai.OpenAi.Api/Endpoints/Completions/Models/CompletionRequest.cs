@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Azure.Ai.OpenAi.Completions
 {
@@ -35,6 +36,8 @@ namespace Azure.Ai.OpenAi.Completions
         public object? StopSequence { get; set; }
         [JsonPropertyName("best_of")]
         public int? BestOf { get; set; }
+        [JsonPropertyName("logit_bias")]
+        public Dictionary<string, int> Bias { get; set; }
         [JsonPropertyName("user")]
         public string? User { get; set; }
     }

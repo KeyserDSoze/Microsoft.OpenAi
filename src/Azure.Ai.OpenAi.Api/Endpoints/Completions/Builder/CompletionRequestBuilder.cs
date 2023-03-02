@@ -67,26 +67,100 @@ namespace Azure.Ai.OpenAi
             return this;
         }
         /// <summary>
-        /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
-        /// </summary>
-        /// <param name="user">Unique identifier</param>
-        /// <returns>Builder</returns>
-        public CompletionRequestBuilder WithUser(string user)
-        {
-            _completionRequest.User = user;
-            return this;
-        }
-        /// <summary>
-        /// Generates best_of completions server-side and returns the "best" (the one with the highest log probability per token). Results cannot be streamed.
-        /// When used with n, best_of controls the number of candidate completions and n specifies how many to return – best_of must be greater than n.
-        /// Note: Because this parameter generates many completions, it can quickly consume your token quota.Use carefully and ensure that you have reasonable settings for max_tokens and stop.
+        /// ID of the model to use.
         /// </summary>
         /// <param name="value">Value</param>
         /// <returns>Builder</returns>
-        public CompletionRequestBuilder BestOf(int value)
+        public CompletionRequestBuilder WithModel(ModelType model)
         {
-            _completionRequest.Stream = false;
-            _completionRequest.BestOf = value;
+            _completionRequest.ModelId = Model.FromModelType(model).Id;
+            return this;
+        }
+        /// <summary>
+        /// ID of the model to use. You can use <see cref="IOpenAiModelApi.AllAsync()"/> to see all of your available models, or use a standard model like <see cref="Model.DavinciText"/>.
+        /// </summary>
+        /// <param name="value">Value</param>
+        /// <returns>Builder</returns>
+        public CompletionRequestBuilder WithModel(string modelId)
+        {
+            _completionRequest.ModelId = modelId;
+            return this;
+        }
+        /// <summary>
+        /// The suffix that comes after a completion of inserted text. Defaults to null.
+        /// </summary>
+        /// <param name="suffix">Suffix</param>
+        /// <returns>Builder</returns>
+        public CompletionRequestBuilder WithSuffix(string suffix)
+        {
+            _completionRequest.Suffix = suffix;
+            return this;
+        }
+        /// <summary>
+        /// How many tokens to complete to. Can return fewer if a stop sequence is hit.  Defaults to 16.
+        /// </summary>
+        /// <param name="value">Value</param>
+        /// <returns>Builder</returns>
+        public CompletionRequestBuilder SetMaxTokens(int value)
+        {
+            _completionRequest.MaxTokens = value;
+            return this;
+        }
+        /// <summary>
+        /// What sampling temperature to use. Higher values means the model will take more risks. Try 0.9 for more creative applications, and 0 (argmax sampling) for ones with a well-defined answer. It is generally recommend to use this or Nuclues sampling (TopP) but not both.
+        /// </summary>
+        /// <param name="value">Value</param>
+        /// <returns>Builder</returns>
+        public CompletionRequestBuilder WithTemperature(double value)
+        {
+            if (value < 0)
+                throw new ArgumentException("Temperature with a value lesser than 0");
+            if (value > 1)
+                throw new ArgumentException("Temperature with a value greater than 1");
+            _completionRequest.Temperature = value;
+            return this;
+        }
+        /// <summary>
+        /// An alternative to sampling with temperature, called nucleus sampling, where the model considers the results of the tokens with top_p probability mass. So 0.1 means only the tokens comprising the top 10% probability mass are considered. It is generally recommend to use this or temperature but not both.
+        /// </summary>
+        /// <param name="value">Value</param>
+        /// <returns>Builder</returns>
+        public CompletionRequestBuilder WithNucleusSampling(double value)
+        {
+            if (value < 0)
+                throw new ArgumentException("Nucleus sampling with a value lesser than 0");
+            if (value > 1)
+                throw new ArgumentException("Nucleus sampling with a value greater than 1");
+            _completionRequest.TopP = value;
+            return this;
+        }
+        /// <summary>
+        /// How many different choices to request for each prompt.  Defaults to 1.
+        /// </summary>
+        /// <param name="value">Value</param>
+        /// <returns>Builder</returns>
+        public CompletionRequestBuilder WithNumberOfChoicesPerPrompt(int value)
+        {
+            _completionRequest.NumberOfChoicesPerPrompt = value;
+            return this;
+        }
+        /// <summary>
+        /// Include the log probabilities on the logprobs most likely tokens, which can be found in <see cref="CompletionResult.Completions"/> -> <see cref="Choice.Logprobs"/>. So for example, if logprobs is 5, the API will return a list of the 5 most likely tokens. If logprobs is supplied, the API will always return the logprob of the sampled token, so there may be up to logprobs+1 elements in the response. The maximum value for logprobs is 5.
+        /// </summary>
+        /// <param name="value">Value</param>
+        /// <returns>Builder</returns>
+        public CompletionRequestBuilder WithLogProbs(int value)
+        {
+            _completionRequest.Logprobs = value;
+            return this;
+        }
+        /// <summary>
+        /// Echo back the prompt in addition to the completion.
+        /// </summary>
+        /// <returns>Builder</returns>
+        public CompletionRequestBuilder WithEcho()
+        {
+            _completionRequest.Echo = true;
             return this;
         }
         /// <summary>
@@ -100,36 +174,6 @@ namespace Azure.Ai.OpenAi
                 _completionRequest.StopSequence = values;
             else if (values.Length == 1)
                 _completionRequest.StopSequence = values[0];
-            return this;
-        }
-        /// <summary>
-        /// Echo back the prompt in addition to the completion.
-        /// </summary>
-        /// <returns>Builder</returns>
-        public CompletionRequestBuilder WithEcho()
-        {
-            _completionRequest.Echo = true;
-            return this;
-        }
-        /// <summary>
-        /// Include the log probabilities on the logprobs most likely tokens, which can be found in <see cref="CompletionResult.Completions"/> -> <see cref="Choice.Logprobs"/>. So for example, if logprobs is 5, the API will return a list of the 5 most likely tokens. If logprobs is supplied, the API will always return the logprob of the sampled token, so there may be up to logprobs+1 elements in the response. The maximum value for logprobs is 5.
-        /// </summary>
-        /// <param name="value">Value</param>
-        /// <returns>Builder</returns>
-        public CompletionRequestBuilder WithLogProbs(int value)
-        {
-            _completionRequest.Logprobs = value;
-            return this;
-        }
-
-        /// <summary>
-        /// How many different choices to request for each prompt.  Defaults to 1.
-        /// </summary>
-        /// <param name="value">Value</param>
-        /// <returns>Builder</returns>
-        public CompletionRequestBuilder WithNumberOfChoicesPerPrompt(int value)
-        {
-            _completionRequest.NumberOfChoicesPerPrompt = value;
             return this;
         }
         /// <summary>
@@ -161,71 +205,59 @@ namespace Azure.Ai.OpenAi
             return this;
         }
         /// <summary>
-        /// An alternative to sampling with temperature, called nucleus sampling, where the model considers the results of the tokens with top_p probability mass. So 0.1 means only the tokens comprising the top 10% probability mass are considered. It is generally recommend to use this or temperature but not both.
+        /// Generates best_of completions server-side and returns the "best" (the one with the highest log probability per token). Results cannot be streamed.
+        /// When used with n, best_of controls the number of candidate completions and n specifies how many to return – best_of must be greater than n.
+        /// Note: Because this parameter generates many completions, it can quickly consume your token quota.Use carefully and ensure that you have reasonable settings for max_tokens and stop.
         /// </summary>
         /// <param name="value">Value</param>
         /// <returns>Builder</returns>
-        public CompletionRequestBuilder WithNucleusSampling(double value)
+        public CompletionRequestBuilder BestOf(int value)
         {
-            if (value < 0)
-                throw new ArgumentException("Nucleus sampling with a value lesser than 0");
-            if (value > 1)
-                throw new ArgumentException("Nucleus sampling with a value greater than 1");
-            _completionRequest.TopP = value;
+            _completionRequest.Stream = false;
+            _completionRequest.BestOf = value;
             return this;
         }
         /// <summary>
-        /// What sampling temperature to use. Higher values means the model will take more risks. Try 0.9 for more creative applications, and 0 (argmax sampling) for ones with a well-defined answer. It is generally recommend to use this or Nuclues sampling (TopP) but not both.
+        /// Modify the likelihood of specified tokens appearing in the completion.
+        /// Accepts a json object that maps tokens(specified by their token ID in the GPT tokenizer) to an associated bias value from -100 to 100. You can use this tokenizer tool (which works for both GPT-2 and GPT-3) to convert text to token IDs. Mathematically, the bias is added to the logits generated by the model prior to sampling. The exact effect will vary per model, but values between -1 and 1 should decrease or increase likelihood of selection; values like -100 or 100 should result in a ban or exclusive selection of the relevant token.
+        /// As an example, you can pass { "50256": -100}
+        /// to prevent the <|endoftext|> token from being generated.
         /// </summary>
-        /// <param name="value">Value</param>
+        /// <param name="key"></param>
+        /// <param name="value"></param>
         /// <returns>Builder</returns>
-        public CompletionRequestBuilder WithTemperature(double value)
+        public CompletionRequestBuilder WithBias(string key, int value)
         {
-            if (value < 0)
-                throw new ArgumentException("Temperature with a value lesser than 0");
-            if (value > 1)
-                throw new ArgumentException("Temperature with a value greater than 1");
-            _completionRequest.Temperature = value;
+            if (_completionRequest.Bias == null)
+                _completionRequest.Bias = new Dictionary<string, int>();
+            if (!_completionRequest.Bias.ContainsKey(key))
+                _completionRequest.Bias.Add(key, value);
+            else
+                _completionRequest.Bias[key] = value;
             return this;
         }
         /// <summary>
-        /// ID of the model to use.
+        /// Modify the likelihood of specified tokens appearing in the completion.
+        /// Accepts a json object that maps tokens(specified by their token ID in the GPT tokenizer) to an associated bias value from -100 to 100. You can use this tokenizer tool (which works for both GPT-2 and GPT-3) to convert text to token IDs. Mathematically, the bias is added to the logits generated by the model prior to sampling. The exact effect will vary per model, but values between -1 and 1 should decrease or increase likelihood of selection; values like -100 or 100 should result in a ban or exclusive selection of the relevant token.
+        /// As an example, you can pass { "50256": -100}
+        /// to prevent the <|endoftext|> token from being generated.
         /// </summary>
-        /// <param name="value">Value</param>
+        /// <param name="bias"></param>
         /// <returns>Builder</returns>
-        public CompletionRequestBuilder WithModel(ModelType model)
+        public CompletionRequestBuilder WithBias(Dictionary<string, int> bias)
         {
-            _completionRequest.ModelId = Model.FromModelType(model).Id;
+            foreach (var c in bias)
+                WithBias(c.Key, c.Value);
             return this;
         }
         /// <summary>
-        /// ID of the model to use. You can use <see cref="IOpenAiModelApi.AllAsync()"/> to see all of your available models, or use a standard model like <see cref="Model.DavinciText"/>.
+        /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
         /// </summary>
-        /// <param name="value">Value</param>
+        /// <param name="user">Unique identifier</param>
         /// <returns>Builder</returns>
-        public CompletionRequestBuilder WithModel(string modelId)
+        public CompletionRequestBuilder WithUser(string user)
         {
-            _completionRequest.ModelId = modelId;
-            return this;
-        }
-        /// <summary>
-        /// How many tokens to complete to. Can return fewer if a stop sequence is hit.  Defaults to 16.
-        /// </summary>
-        /// <param name="value">Value</param>
-        /// <returns>Builder</returns>
-        public CompletionRequestBuilder SetMaxTokens(int value)
-        {
-            _completionRequest.MaxTokens = value;
-            return this;
-        }
-        /// <summary>
-        /// The suffix that comes after a completion of inserted text. Defaults to null.
-        /// </summary>
-        /// <param name="suffix">Suffix</param>
-        /// <returns>Builder</returns>
-        public CompletionRequestBuilder WithSuffix(string suffix)
-        {
-            _completionRequest.Suffix = suffix;
+            _completionRequest.User = user;
             return this;
         }
     }

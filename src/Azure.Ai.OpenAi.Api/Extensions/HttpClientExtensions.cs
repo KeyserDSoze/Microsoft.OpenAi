@@ -4,6 +4,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Http;
+using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Threading;
@@ -53,7 +54,10 @@ namespace Azure.Ai.OpenAi
         }
         private const string StartingWith = "data: ";
         private const string Done = "[DONE]";
-        internal static async IAsyncEnumerable<TResponse> ExecuteStreamAsync<TResponse>(this HttpClient client, string url, object? message, CancellationToken cancellationToken)
+        internal static async IAsyncEnumerable<TResponse> ExecuteStreamAsync<TResponse>(this HttpClient client,
+            string url,
+            object? message,
+            [EnumeratorCancellation] CancellationToken cancellationToken)
         {
             var response = await client.PrivatedExecuteAsync(url, message, true, false, cancellationToken);
             using var stream = await response.Content.ReadAsStreamAsync();
