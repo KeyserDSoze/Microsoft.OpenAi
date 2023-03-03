@@ -1,31 +1,36 @@
-﻿using System.Net.Http;
+﻿using System.Collections.Generic;
+using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Azure.Ai.OpenAi.Models;
 
 namespace Azure.Ai.OpenAi
 {
-    public sealed class ModerationRequestBuilder
+    public sealed class ModerationRequestBuilder : RequestBuilder<ModerationsRequest>
     {
-        private readonly HttpClient _client;
-        private readonly OpenAiConfiguration _configuration;
-        private readonly ModerationsRequest _moderationRequest;
-        internal ModerationRequestBuilder(HttpClient client, OpenAiConfiguration configuration, string input)
+        private static readonly List<Model> s_models = new List<Model>()
         {
-            _client = client;
-            _configuration = configuration;
-            _moderationRequest = new ModerationsRequest()
+            Model.TextModerationLatest,
+            Model.TextModerationStable
+        };
+        public override List<Model> AvailableModels => s_models;
+
+        internal ModerationRequestBuilder(HttpClient client, OpenAiConfiguration configuration, string input)
+            : base(client, configuration, () =>
             {
-                Input = input,
-                ModelId = Model.TextModerationLatest.Id,
-            };
+                return new ModerationsRequest()
+                {
+                    Input = input,
+                };
+            })
+        {
         }
         /// <summary>
         /// Classifies if text violates OpenAI's Content Policy.
         /// </summary>
         /// <returns>Builder</returns>
         public ValueTask<ModerationsResponse> ExecuteAsync(CancellationToken cancellationToken = default)
-            => _client.ExecuteAsync<ModerationsResponse>(_configuration.ModerationUri, _moderationRequest, cancellationToken);
+            => _client.ExecuteAsync<ModerationsResponse>(_configuration.ModerationUri, _request, cancellationToken);
         /// <summary>
         /// ID of the model to use.
         /// </summary>
@@ -33,7 +38,7 @@ namespace Azure.Ai.OpenAi
         /// <returns>Builder</returns>
         public ModerationRequestBuilder WithModel(ModelType model)
         {
-            _moderationRequest.ModelId = Model.FromModelType(model).Id;
+            _request.ModelId = Model.FromModelType(model).Id;
             return this;
         }
         /// <summary>
@@ -43,7 +48,7 @@ namespace Azure.Ai.OpenAi
         /// <returns>Builder</returns>
         public ModerationRequestBuilder WithModel(string modelId)
         {
-            _moderationRequest.ModelId = modelId;
+            _request.ModelId = modelId;
             return this;
         }
     }
