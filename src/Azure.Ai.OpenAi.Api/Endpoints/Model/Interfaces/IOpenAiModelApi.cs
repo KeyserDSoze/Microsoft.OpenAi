@@ -16,11 +16,11 @@ namespace Azure.Ai.OpenAi
         /// </summary>
         /// <param name="id">The id/name of the model to get more details about</param>
         /// <returns>Asynchronously returns the <see cref="Model"/> with all available properties</returns>
-        ValueTask<Model> GetDetailsAsync(string id, CancellationToken cancellationToken = default);
+        ValueTask<Model> RetrieveAsync(string id, CancellationToken cancellationToken = default);
         /// <summary>
         /// List all models via the API
         /// </summary>
         /// <returns>Asynchronously returns the list of all <see cref="Model"/>s</returns>
-        Task<List<Model>> AllAsync(CancellationToken cancellationToken = default);
+        Task<List<Model>> ListAsync(CancellationToken cancellationToken = default);
     }
 }

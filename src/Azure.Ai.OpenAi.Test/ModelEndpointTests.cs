@@ -15,7 +15,7 @@ namespace Azure.OpenAi.Test
 
             Assert.NotNull(api.Model);
 
-            var results = await api.Model.AllAsync();
+            var results = await api.Model.ListAsync();
             Assert.NotNull(results);
             Assert.NotEmpty(results);
             Assert.True(results.Any(c => c.Id.ToLower().StartsWith("text-davinci")));
@@ -28,7 +28,7 @@ namespace Azure.OpenAi.Test
 
             Assert.NotNull(api.Model);
 
-            var result = await api.Model.GetDetailsAsync(Model.DavinciText.Id);
+            var result = await api.Model.RetrieveAsync(Model.DavinciText.Id);
             Assert.NotNull(result);
 
             Assert.NotNull(result.CreatedUnixTime);
@@ -47,7 +47,7 @@ namespace Azure.OpenAi.Test
         public async ValueTask GetEnginesAsync_ShouldReturnTheEngineList()
         {
             var api = DiUtility.GetOpenAi();
-            var models = await api.Model.AllAsync();
+            var models = await api.Model.ListAsync();
             Assert.True(models.Count > 5);
         }
 
@@ -59,7 +59,7 @@ namespace Azure.OpenAi.Test
         public async ValueTask RetrieveEngineDetailsAsync_ShouldRetrieveEngineDetails(string modelId)
         {
             var api = DiUtility.GetOpenAi();
-            var modelData = await api.Model.GetDetailsAsync(modelId);
+            var modelData = await api.Model.RetrieveAsync(modelId);
             Assert.Equal(modelId, modelData.Id);
             Assert.True(modelData.Created > new DateTime(2018, 1, 1));
             Assert.True(modelData.Created < DateTime.UtcNow.AddDays(1));

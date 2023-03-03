@@ -89,6 +89,8 @@ namespace Azure.Ai.OpenAi.Models
         public static Model AdaTextEmbedding { get; } = new Model("text-embedding-ada-002") { OwnedBy = "openai" };
         public static Model TextModerationStable { get; } = new Model("text-moderation-stable") { OwnedBy = "openai" };
         public static Model TextModerationLatest { get; } = new Model("text-moderation-latest") { OwnedBy = "openai" };
+        public static Model Gpt35Turbo { get; } = new Model("gpt-3.5-turbo") { OwnedBy = "openai" };
+        public static Model Gpt35Turbo0301 { get; } = new Model("gpt-3.5-turbo-0301") { OwnedBy = "openai" };
         internal static Model FromModelType(ModelType type)
         {
             switch (type)

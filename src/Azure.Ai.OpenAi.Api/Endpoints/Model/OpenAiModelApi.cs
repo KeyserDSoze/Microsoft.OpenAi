@@ -16,9 +16,9 @@ namespace Azure.Ai.OpenAi
             _client = httpClientFactory.CreateClient(OpenAiSettings.HttpClientName);
             _configuration = configuration;
         }
-        public ValueTask<Model> GetDetailsAsync(string id, CancellationToken cancellationToken = default)
+        public ValueTask<Model> RetrieveAsync(string id, CancellationToken cancellationToken = default)
             => _client.ExecuteAsync<Model>($"{_configuration.ModelUri}/{id}", null, cancellationToken);
-        public async Task<List<Model>> AllAsync(CancellationToken cancellationToken = default)
+        public async Task<List<Model>> ListAsync(CancellationToken cancellationToken = default)
         {
             var response = await _client.ExecuteAsync<JsonHelperRoot>(_configuration.ModelUri, null, cancellationToken);
             return response.Data!;

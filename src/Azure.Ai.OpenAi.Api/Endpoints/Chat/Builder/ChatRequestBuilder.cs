@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
@@ -8,20 +9,41 @@ using Azure.Ai.OpenAi.Models;
 
 namespace Azure.Ai.OpenAi
 {
-    public sealed class CompletionRequestBuilder
+    public abstract class RequestBuilder<T>
+        where T : class, IOpenAiRequest
     {
-        private readonly HttpClient _client;
-        private readonly OpenAiConfiguration _configuration;
-        private readonly CompletionRequest _completionRequest;
-        internal CompletionRequestBuilder(HttpClient client, OpenAiConfiguration configuration, string[] prompts)
+        private protected readonly HttpClient _client;
+        private protected readonly OpenAiConfiguration _configuration;
+        private protected readonly T _request;
+        public abstract List<Model> AvailableModels { get; }
+        private protected Model DefaultModel => AvailableModels.First();
+        private protected RequestBuilder(HttpClient client, OpenAiConfiguration configuration, Func<T> requestCreator)
         {
             _client = client;
             _configuration = configuration;
-            _completionRequest = new CompletionRequest()
+            _request = requestCreator.Invoke();
+            if (_request.ModelId == null)
+                _request.ModelId = DefaultModel.Id;
+        }
+    }
+    public sealed class ChatRequestBuilder : RequestBuilder<ChatRequest>
+    {
+        private static readonly List<Model> s_models = new List<Model>()
+        {
+            Model.Gpt35Turbo,
+            Model.Gpt35Turbo0301
+        };
+        public override List<Model> AvailableModels { get; } = s_models;
+        internal ChatRequestBuilder(HttpClient client, OpenAiConfiguration configuration, ChatMessage message) : base(client,
+            configuration,
+            () =>
             {
-                Prompt = prompts.Length > 1 ? (object)prompts : (prompts.Length == 1 ? prompts[1] : string.Empty),
-                ModelId = Model.DefaultModel.Id,
-            };
+                return new ChatRequest()
+                {
+                    Messages = new List<ChatMessage>() { message }
+                };
+            })
+        {
         }
         /// <summary>
         /// Specifies where the results should stream and be returned at one time.
@@ -29,8 +51,8 @@ namespace Azure.Ai.OpenAi
         /// <returns>Builder</returns>
         public ValueTask<CompletionResult> ExecuteAsync(CancellationToken cancellationToken = default)
         {
-            _completionRequest.Stream = false;
-            return _client.ExecuteAsync<CompletionResult>(_configuration.CompletionUri, _completionRequest, cancellationToken);
+            _request.Stream = false;
+            return _client.ExecuteAsync<CompletionResult>(_configuration.CompletionUri, _request, cancellationToken);
         }
         /// <summary>
         /// Specifies where the results should stream and be returned at one time.
@@ -38,34 +60,28 @@ namespace Azure.Ai.OpenAi
         /// <returns>Builder</returns>
         public IAsyncEnumerable<CompletionResult> ExecuteAsStreamAsync(CancellationToken cancellationToken = default)
         {
-            _completionRequest.Stream = true;
-            _completionRequest.BestOf = null;
-            return _client.ExecuteStreamAsync<CompletionResult>(_configuration.CompletionUri, _completionRequest, cancellationToken);
+            _request.Stream = true;
+            return _client.ExecuteStreamAsync<CompletionResult>(_configuration.CompletionUri, _request, cancellationToken);
         }
         /// <summary>
-        /// Add further prompt to the request.
+        /// Add a message to the request
         /// </summary>
-        /// <param name="prompt">Prompt</param>
+        /// <param name="message">Prompt</param>
         /// <returns>Builder</returns>
-        public CompletionRequestBuilder AddPrompt(string prompt)
+        public ChatRequestBuilder AddMessage(ChatMessage message)
         {
-            if (_completionRequest.Prompt is string[] array)
-            {
-                var newArray = new string[array.Length + 1];
-                array.CopyTo(newArray, 0);
-                newArray[^1] = prompt;
-                _completionRequest.Prompt = newArray;
-            }
-            else if (_completionRequest.Prompt is string value)
-            {
-                _completionRequest.Prompt = new string[2] { value, prompt };
-            }
-            else
-            {
-                _completionRequest.Prompt = prompt;
-            }
+            _request.Messages ??= new List<ChatMessage>();
+            _request.Messages.Add(message);
             return this;
         }
+        /// <summary>
+        /// Add a message to the request
+        /// </summary>
+        /// <param name="content"></param>
+        /// <param name="role"></param>
+        /// <returns>Builder</returns>
+        public ChatRequestBuilder AddMessage(string content, ChatRole role = ChatRole.User)
+            => AddMessage(new ChatMessage { Content = content, Role = role });
         /// <summary>
         /// ID of the model to use.
         /// </summary>
@@ -73,7 +89,7 @@ namespace Azure.Ai.OpenAi
         /// <returns>Builder</returns>
         public CompletionRequestBuilder WithModel(ModelType model)
         {
-            _completionRequest.ModelId = Model.FromModelType(model).Id;
+            _request.ModelId = Model.FromModelType(model).Id;
             return this;
         }
         /// <summary>
@@ -83,7 +99,7 @@ namespace Azure.Ai.OpenAi
         /// <returns>Builder</returns>
         public CompletionRequestBuilder WithModel(string modelId)
         {
-            _completionRequest.ModelId = modelId;
+            _request.ModelId = modelId;
             return this;
         }
         /// <summary>
@@ -93,7 +109,7 @@ namespace Azure.Ai.OpenAi
         /// <returns>Builder</returns>
         public CompletionRequestBuilder WithSuffix(string suffix)
         {
-            _completionRequest.Suffix = suffix;
+            _request.Suffix = suffix;
             return this;
         }
         /// <summary>
@@ -103,7 +119,7 @@ namespace Azure.Ai.OpenAi
         /// <returns>Builder</returns>
         public CompletionRequestBuilder SetMaxTokens(int value)
         {
-            _completionRequest.MaxTokens = value;
+            _request.MaxTokens = value;
             return this;
         }
         /// <summary>
@@ -117,7 +133,7 @@ namespace Azure.Ai.OpenAi
                 throw new ArgumentException("Temperature with a value lesser than 0");
             if (value > 1)
                 throw new ArgumentException("Temperature with a value greater than 1");
-            _completionRequest.Temperature = value;
+            _request.Temperature = value;
             return this;
         }
         /// <summary>
@@ -131,7 +147,7 @@ namespace Azure.Ai.OpenAi
                 throw new ArgumentException("Nucleus sampling with a value lesser than 0");
             if (value > 1)
                 throw new ArgumentException("Nucleus sampling with a value greater than 1");
-            _completionRequest.TopP = value;
+            _request.TopP = value;
             return this;
         }
         /// <summary>
@@ -141,7 +157,7 @@ namespace Azure.Ai.OpenAi
         /// <returns>Builder</returns>
         public CompletionRequestBuilder WithNumberOfChoicesPerPrompt(int value)
         {
-            _completionRequest.NumberOfChoicesPerPrompt = value;
+            _request.NumberOfChoicesPerPrompt = value;
             return this;
         }
         /// <summary>
@@ -151,7 +167,7 @@ namespace Azure.Ai.OpenAi
         /// <returns>Builder</returns>
         public CompletionRequestBuilder WithLogProbs(int value)
         {
-            _completionRequest.Logprobs = value;
+            _request.Logprobs = value;
             return this;
         }
         /// <summary>
@@ -160,7 +176,7 @@ namespace Azure.Ai.OpenAi
         /// <returns>Builder</returns>
         public CompletionRequestBuilder WithEcho()
         {
-            _completionRequest.Echo = true;
+            _request.Echo = true;
             return this;
         }
         /// <summary>
@@ -171,9 +187,9 @@ namespace Azure.Ai.OpenAi
         public CompletionRequestBuilder WithStopSequence(params string[] values)
         {
             if (values.Length > 1)
-                _completionRequest.StopSequence = values;
+                _request.StopSequence = values;
             else if (values.Length == 1)
-                _completionRequest.StopSequence = values[0];
+                _request.StopSequence = values[0];
             return this;
         }
         /// <summary>
@@ -187,7 +203,7 @@ namespace Azure.Ai.OpenAi
                 throw new ArgumentException("Frequency penalty with a value lesser than -1");
             if (value > 1)
                 throw new ArgumentException("Frequency penalty with a value greater than 1");
-            _completionRequest.FrequencyPenalty = value;
+            _request.FrequencyPenalty = value;
             return this;
         }
         /// <summary>
@@ -201,7 +217,7 @@ namespace Azure.Ai.OpenAi
                 throw new ArgumentException("Presence penalty with a value lesser than -1");
             if (value > 1)
                 throw new ArgumentException("Presence penalty with a value greater than 1");
-            _completionRequest.PresencePenalty = value;
+            _request.PresencePenalty = value;
             return this;
         }
         /// <summary>
@@ -213,8 +229,8 @@ namespace Azure.Ai.OpenAi
         /// <returns>Builder</returns>
         public CompletionRequestBuilder BestOf(int value)
         {
-            _completionRequest.Stream = false;
-            _completionRequest.BestOf = value;
+            _request.Stream = false;
+            _request.BestOf = value;
             return this;
         }
         /// <summary>
@@ -228,11 +244,11 @@ namespace Azure.Ai.OpenAi
         /// <returns>Builder</returns>
         public CompletionRequestBuilder WithBias(string key, int value)
         {
-            _completionRequest.Bias ??= new Dictionary<string, int>();
-            if (!_completionRequest.Bias.ContainsKey(key))
-                _completionRequest.Bias.Add(key, value);
+            _request.Bias ??= new Dictionary<string, int>();
+            if (!_request.Bias.ContainsKey(key))
+                _request.Bias.Add(key, value);
             else
-                _completionRequest.Bias[key] = value;
+                _request.Bias[key] = value;
             return this;
         }
         /// <summary>
@@ -256,7 +272,7 @@ namespace Azure.Ai.OpenAi
         /// <returns>Builder</returns>
         public CompletionRequestBuilder WithUser(string user)
         {
-            _completionRequest.User = user;
+            _request.User = user;
             return this;
         }
     }

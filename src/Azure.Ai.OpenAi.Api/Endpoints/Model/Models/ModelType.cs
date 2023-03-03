@@ -11,6 +11,8 @@
         DavinciCode,
         AdaTextEmbedding,
         TextModerationStable,
-        TextModerationLatest
+        TextModerationLatest,
+        Gpt35Turbo,
+        Gpt35Turbo0301
     }
 }

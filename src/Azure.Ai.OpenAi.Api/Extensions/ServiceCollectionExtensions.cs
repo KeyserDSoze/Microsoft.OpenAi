@@ -21,7 +21,6 @@ namespace Microsoft.Extensions.DependencyInjection
             var httpClientBuilder = services.AddHttpClient(OpenAiSettings.HttpClientName, client =>
             {
                 client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", openAiSettings.ApiKey);
-                client.DefaultRequestHeaders.Add("api-key", openAiSettings.ApiKey);
                 if (!string.IsNullOrEmpty(openAiSettings.OrganizationName))
                     client.DefaultRequestHeaders.Add("OpenAI-Organization", openAiSettings.OrganizationName);
 
