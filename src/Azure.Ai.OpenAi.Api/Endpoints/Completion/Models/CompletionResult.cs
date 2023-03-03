@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace Azure.Ai.OpenAi.Completions
+namespace Azure.Ai.OpenAi.Completion
 {
     /// <summary>
     /// Represents a result from calling the Completion API
@@ -17,7 +17,7 @@ namespace Azure.Ai.OpenAi.Completions
         /// The completions returned by the API.  Depending on your request, there may be 1 or many choices.
         /// </summary>
         [JsonPropertyName("choices")]
-        public List<Choice>? Completions { get; set; }
+        public List<CompletionChoice>? Completions { get; set; }
         /// <summary>
         /// API token usage as reported by the OpenAI API for this request
         /// </summary>

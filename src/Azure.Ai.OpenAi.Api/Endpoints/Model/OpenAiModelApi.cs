@@ -3,9 +3,8 @@ using System.Net.Http;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
-using Azure.Ai.OpenAi.Models;
 
-namespace Azure.Ai.OpenAi
+namespace Azure.Ai.OpenAi.Models
 {
     internal sealed class OpenAiModelApi : IOpenAiModelApi
     {

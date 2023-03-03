@@ -1,10 +1,10 @@
 ﻿using System.IO;
 
-namespace Azure.Ai.OpenAi
+namespace Azure.Ai.OpenAi.Image
 {
     public interface IOpenAiImageApi
     {
-        ImageGenerationRequestBuilder Generate(string prompt);
+        ImageCreateRequestBuilder Generate(string prompt);
         ImageVariationRequestBuilder Variate(Stream image, string imageName = "image.png");
     }
 }

@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace Azure.Ai.OpenAi.Endpoints.Image.Models
+namespace Azure.Ai.OpenAi.Image
 {
-    public sealed class ImagesResponse : ApiBaseResponse
+    public sealed class ImageResult : ApiBaseResponse
     {
         [JsonPropertyName("created")]
         public int Created { get; set; }
         [JsonPropertyName("data")]
-        public List<ImageResult> Data { get; set; }
+        public List<ImageData> Data { get; set; }
     }
 }

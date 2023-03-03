@@ -13,6 +13,8 @@
         TextModerationStable,
         TextModerationLatest,
         Gpt35Turbo,
-        Gpt35Turbo0301
+        Gpt35Turbo0301,
+        TextDavinciEdit,
+        CodeDavinciEdit
     }
 }

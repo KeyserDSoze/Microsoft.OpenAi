@@ -1,6 +1,6 @@
 ﻿using System.Net.Http;
 
-namespace Azure.Ai.OpenAi
+namespace Azure.Ai.OpenAi.Completion
 {
     internal sealed class OpenAiCompletionApi : IOpenAiCompletionApi
     {

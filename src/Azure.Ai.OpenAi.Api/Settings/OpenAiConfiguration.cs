@@ -6,6 +6,8 @@ namespace Azure.Ai.OpenAi
     {
         public string Uri { get; }
         public string CompletionUri { get; }
+        public string ChatUri { get; }
+        public string EditUri { get; }
         public string EmbeddingUri { get; }
         public string FileUri { get; }
         public string ModelUri { get; }
@@ -27,6 +29,8 @@ namespace Azure.Ai.OpenAi
                 Uri = $"https://api.openai.com/{settings.Version}/{{0}}";
             }
             CompletionUri = string.Format(Uri, "completions");
+            ChatUri = string.Format(Uri, "chat/completions");
+            EditUri = string.Format(Uri, "edits");
             EmbeddingUri = string.Format(Uri, "embeddings");
             FileUri = string.Format(Uri, "files");
             ModelUri = string.Format(Uri, "models");

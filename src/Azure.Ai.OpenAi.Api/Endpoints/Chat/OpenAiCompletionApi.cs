@@ -1,17 +1,17 @@
 ﻿using System.Net.Http;
 
-namespace Azure.Ai.OpenAi
+namespace Azure.Ai.OpenAi.Chat
 {
-    internal sealed class OpenAiCompletionApi : IOpenAiCompletionApi
+    internal sealed class OpenAiChatApi : IOpenAiChatApi
     {
         private readonly HttpClient _client;
         private readonly OpenAiConfiguration _configuration;
-        public OpenAiCompletionApi(IHttpClientFactory httpClientFactory, OpenAiConfiguration configuration)
+        public OpenAiChatApi(IHttpClientFactory httpClientFactory, OpenAiConfiguration configuration)
         {
             _client = httpClientFactory.CreateClient(OpenAiSettings.HttpClientName);
             _configuration = configuration;
         }
-        public CompletionRequestBuilder Request(params string[] prompts)
-            => new CompletionRequestBuilder(_client, _configuration, prompts);
+        public ChatRequestBuilder Request(ChatMessage message)
+            => new ChatRequestBuilder(_client, _configuration, message);
     }
 }

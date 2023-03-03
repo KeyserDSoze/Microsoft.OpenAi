@@ -1,27 +1,19 @@
 ﻿using System;
 using System.IO;
+using System.Text.Json.Serialization;
 
-namespace Azure.Ai.OpenAi.Endpoints.Image.Models
+namespace Azure.Ai.OpenAi.Image
 {
-    public sealed class ImageVariationRequest : IDisposable
+    public sealed class ImageVariationRequest : IOpenAiRequest, IDisposable
     {
-        /// <summary>
-        /// The image to use as the basis for the variation(s). Must be a valid PNG file, less than 4MB, and square.
-        /// </summary>
         public Stream Image { get; set; }
         public string ImageName { get; set; }
-        /// <summary>
-        /// The number of images to generate. Must be between 1 and 10.
-        /// </summary>
         public int NumberOfResults { get; set; }
-        /// <summary>
-        /// The size of the generated images. Must be one of 256x256, 512x512, or 1024x1024.
-        /// </summary>
         public string Size { get; set; }
-        /// <summary>
-        /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
-        /// </summary>
         public string User { get; set; }
+        public string ResponseFormat { get; set; }
+        [JsonIgnore]
+        public string? ModelId { get; set; }
         private void Dispose(bool disposing)
         {
             if (disposing)

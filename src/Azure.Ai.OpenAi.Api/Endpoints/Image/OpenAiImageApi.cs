@@ -2,7 +2,7 @@
 using System.IO;
 using System.Net.Http;
 
-namespace Azure.Ai.OpenAi
+namespace Azure.Ai.OpenAi.Image
 {
     internal sealed class OpenAiImageApi : IOpenAiImageApi
     {
@@ -14,21 +14,21 @@ namespace Azure.Ai.OpenAi
             _configuration = configuration;
         }
         /// <summary>
-        /// 
+        /// Creates an image given a prompt.
         /// </summary>
         /// <param name="prompt"></param>
         /// <returns>Generation Builder</returns>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public ImageGenerationRequestBuilder Generate(string prompt)
+        public ImageCreateRequestBuilder Generate(string prompt)
         {
             if (prompt.Length > 1000)
                 throw new ArgumentOutOfRangeException(nameof(prompt), "The maximum character length for the prompt is 1000 characters.");
-            return new ImageGenerationRequestBuilder(_client, _configuration, prompt);
+            return new ImageCreateRequestBuilder(_client, _configuration, prompt);
         }
         /// <summary>
-        /// The image to use as the basis for the variation(s). Must be a valid PNG file, less than 4MB, and square.
+        /// Creates a variation of a given image.
         /// </summary>
-        /// <param name="image"></param>
+        /// <param name="image">The image to use as the basis for the variation(s). Must be a valid PNG file, less than 4MB, and square.</param>
         /// <param name="imageName"></param>
         /// <returns>Variation Builder</returns>
         public ImageVariationRequestBuilder Variate(Stream image, string imageName = "image.png")

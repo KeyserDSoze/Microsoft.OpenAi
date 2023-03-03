@@ -1,4 +1,4 @@
-﻿namespace Azure.Ai.OpenAi.Completions
+﻿namespace Azure.Ai.OpenAi.Chat
 {
     public enum ChatRole
     {

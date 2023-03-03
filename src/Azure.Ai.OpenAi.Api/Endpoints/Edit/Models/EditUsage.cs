@@ -1,11 +1,11 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Azure.Ai.OpenAi.Completions
+namespace Azure.Ai.OpenAi.Edit
 {
     /// <summary>
     /// API usage as reported by the OpenAI API for this request
     /// </summary>
-    public class CompletionUsage : Usage
+    public class EditUsage : Usage
     {
         /// <summary>
         /// How many tokens are in the completion(s)
@@ -13,5 +13,4 @@ namespace Azure.Ai.OpenAi.Completions
         [JsonPropertyName("completion_tokens")]
         public short? CompletionTokens { get; set; }
     }
-
 }

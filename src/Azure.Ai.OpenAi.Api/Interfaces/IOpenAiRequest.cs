@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Azure.Ai.OpenAi.Completions
+namespace Azure.Ai.OpenAi
 {
     public interface IOpenAiRequest
     {
-        [JsonPropertyName("model")]
         string? ModelId { get; set; }
     }
 }

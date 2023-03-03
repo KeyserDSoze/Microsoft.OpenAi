@@ -1,6 +1,6 @@
 ﻿using System.Net.Http;
 
-namespace Azure.Ai.OpenAi
+namespace Azure.Ai.OpenAi.Embedding
 {
     internal sealed class OpenAiEmbeddingApi : IOpenAiEmbeddingApi
     {
@@ -11,7 +11,7 @@ namespace Azure.Ai.OpenAi
             _client = httpClientFactory.CreateClient(OpenAiSettings.HttpClientName);
             _configuration = configuration;
         }
-        public EmbeddingRequestBuilder Request(string input)
-            => new EmbeddingRequestBuilder(_client, _configuration, input);
+        public EmbeddingRequestBuilder Request(params string[] inputs)
+            => new EmbeddingRequestBuilder(_client, _configuration, inputs);
     }
 }

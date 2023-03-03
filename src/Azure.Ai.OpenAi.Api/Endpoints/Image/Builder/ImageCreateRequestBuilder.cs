@@ -10,67 +10,46 @@ using Azure.Ai.OpenAi.Models;
 
 namespace Azure.Ai.OpenAi.Image
 {
-    public sealed class ImageVariationRequestBuilder : RequestBuilder<ImageVariationRequest>
+    public sealed class ImageCreateRequestBuilder : RequestBuilder<ImageCreateRequest>
     {
         private static readonly List<Model> s_models = new List<Model>();
         public override List<Model> AvailableModels => s_models;
-        private readonly HttpClient _client;
-        private readonly OpenAiConfiguration _configuration;
-        private readonly ImageVariationRequest _request;
-        internal ImageVariationRequestBuilder(HttpClient client, OpenAiConfiguration configuration,
-            Stream image, string imageName)
+        internal ImageCreateRequestBuilder(HttpClient client, OpenAiConfiguration configuration, string prompt)
             : base(client, configuration, () =>
             {
-                var request = new ImageVariationRequest()
+                return new ImageCreateRequest()
                 {
+                    Prompt = prompt,
                     NumberOfResults = 1,
-                    Size = "1024x1024",
+                    Size = ImageSize.Large.AsString(),
+                    ResponseFormat = ResponseFormatUrl
                 };
-                var memoryStream = new MemoryStream();
-                image.CopyTo(memoryStream);
-                request.Image = memoryStream;
-                request.ImageName = imageName;
-                return request;
             })
         {
         }
+        internal const string ResponseFormatUrl = "url";
+        internal const string ResponseFormatB64Json = "b64_json";
         /// <summary>
-        /// Variate an image given a prompt.
+        /// Creates an image given a prompt.
         /// </summary>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>A list of generated texture urls to download.</returns>
         /// <exception cref="HttpRequestException"></exception>
-        public async ValueTask<ImageResult> ExecuteAsync(CancellationToken cancellationToken = default)
+        public ValueTask<ImageResult> GetUrlAsync(CancellationToken cancellationToken = default)
         {
-            _request.ResponseFormat = ImageCreateRequestBuilder.ResponseFormatUrl;
-            using var content = new MultipartFormDataContent();
-            using var imageData = new MemoryStream();
-            await _request.Image.CopyToAsync(imageData, cancellationToken);
-            imageData.Position = 0;
-            content.Add(new ByteArrayContent(imageData.ToArray()), "image", _request.ImageName);
-
-            content.Add(new StringContent(_request.NumberOfResults.ToString()), "n");
-            content.Add(new StringContent(_request.Size), "size");
-
-            if (!string.IsNullOrWhiteSpace(_request.User))
-            {
-                content.Add(new StringContent(_request.User), "user");
-            }
-            _request.Dispose();
-
-            var response = await _client.ExecuteAsync<ImageResult>($"{_configuration.ImageUri}/variations", content, cancellationToken);
-            return response;
+            _request.ResponseFormat = ResponseFormatUrl;
+            var uri = $"{_configuration.ImageUri}/generations";
+            return _client.ExecuteAsync<ImageResult>(uri, _request, cancellationToken);
         }
         /// <summary>
-        /// Variate an image given a prompt.
+        /// Creates an image given a prompt.
         /// </summary>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>A list of generated texture urls to download.</returns>
         /// <exception cref="HttpRequestException"></exception>
         public async IAsyncEnumerable<Stream> DownloadAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
-            var uri = $"{_configuration.ImageUri}/generations";
-            var responses = await _client.ExecuteAsync<ImageResult>(uri, _request, cancellationToken);
+            var responses = await GetUrlAsync(cancellationToken);
             using var client = new HttpClient();
             foreach (var image in responses.Data)
             {
@@ -93,7 +72,7 @@ namespace Azure.Ai.OpenAi.Image
         /// <param name="numberOfResults"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public ImageVariationRequestBuilder WithNumberOfResults(int numberOfResults)
+        public ImageCreateRequestBuilder WithNumberOfResults(int numberOfResults)
         {
             if (numberOfResults > 10 || numberOfResults < 1)
                 throw new ArgumentOutOfRangeException(nameof(numberOfResults), "The number of results must be between 1 and 10");
@@ -105,7 +84,7 @@ namespace Azure.Ai.OpenAi.Image
         /// </summary>
         /// <param name="size"></param>
         /// <returns></returns>
-        public ImageVariationRequestBuilder WithSize(ImageSize size)
+        public ImageCreateRequestBuilder WithSize(ImageSize size)
         {
             _request.Size = size.AsString();
             return this;
@@ -116,10 +95,18 @@ namespace Azure.Ai.OpenAi.Image
         /// </summary>
         /// <param name="user">Unique identifier</param>
         /// <returns>Builder</returns>
-        public ImageVariationRequestBuilder WithUser(string user)
+        public ImageCreateRequestBuilder WithUser(string user)
         {
             _request.User = user;
             return this;
         }
+        /// <summary>
+        /// The image to use as the basis for the variation(s). Must be a valid PNG file, less than 4MB, and square.
+        /// </summary>
+        /// <param name="image"></param>
+        /// <param name="imageName"></param>
+        /// <returns>Edit Builder</returns>
+        public ImageEditRequestBuilder Edit(Stream image, string imageName = "image.png")
+            => new ImageEditRequestBuilder(_client, _configuration, _request.Prompt, image, imageName);
     }
 }

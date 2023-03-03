@@ -1,4 +1,4 @@
-﻿namespace Azure.Ai.OpenAi.Endpoints.Image.Models
+﻿namespace Azure.Ai.OpenAi.Image
 {
     public enum ImageSize
     {
@@ -14,5 +14,24 @@
         /// 1024x1024
         /// </summary>
         Large,
+    }
+    public static class ImageSizeExtensions
+    {
+        private const string SmallSize = "256x256";
+        private const string MediumSize = "512x512";
+        private const string LargeSize = "1024x1024";
+        public static string AsString(this ImageSize size)
+        {
+            switch (size)
+            {
+                case ImageSize.Small:
+                    return SmallSize;
+                case ImageSize.Medium:
+                    return MediumSize;
+                default:
+                case ImageSize.Large:
+                    return LargeSize;
+            }
+        }
     }
 }

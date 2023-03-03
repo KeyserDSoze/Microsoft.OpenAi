@@ -1,11 +1,11 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Azure.Ai.OpenAi.Completions
+namespace Azure.Ai.OpenAi.Completion
 {
     /// <summary>
     /// Represents a completion choice returned by the Completion API.  
     /// </summary>
-    public class Choice
+    public class CompletionChoice
     {
         /// <summary>
         /// The main text of the completion
@@ -27,12 +27,5 @@ namespace Azure.Ai.OpenAi.Completions
         /// </summary>
         [JsonPropertyName("finish_reason")]
         public string? FinishReason { get; set; }
-        /// <summary>
-        /// Gets the main text of this completion
-        /// </summary>
-        public override string? ToString()
-        {
-            return Text;
-        }
     }
 }

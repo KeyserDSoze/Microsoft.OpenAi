@@ -1,31 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Azure.Ai.OpenAi.Completions;
 using Azure.Ai.OpenAi.Models;
 
-namespace Azure.Ai.OpenAi
+namespace Azure.Ai.OpenAi.Chat
 {
-    public abstract class RequestBuilder<T>
-        where T : class, IOpenAiRequest
-    {
-        private protected readonly HttpClient _client;
-        private protected readonly OpenAiConfiguration _configuration;
-        private protected readonly T _request;
-        public abstract List<Model> AvailableModels { get; }
-        private protected Model DefaultModel => AvailableModels.First();
-        private protected RequestBuilder(HttpClient client, OpenAiConfiguration configuration, Func<T> requestCreator)
-        {
-            _client = client;
-            _configuration = configuration;
-            _request = requestCreator.Invoke();
-            if (_request.ModelId == null)
-                _request.ModelId = DefaultModel.Id;
-        }
-    }
     public sealed class ChatRequestBuilder : RequestBuilder<ChatRequest>
     {
         private static readonly List<Model> s_models = new List<Model>()
@@ -46,22 +27,22 @@ namespace Azure.Ai.OpenAi
         {
         }
         /// <summary>
-        /// Specifies where the results should stream and be returned at one time.
+        /// Execute operation.
         /// </summary>
         /// <returns>Builder</returns>
-        public ValueTask<CompletionResult> ExecuteAsync(CancellationToken cancellationToken = default)
+        public ValueTask<ChatResult> ExecuteAsync(CancellationToken cancellationToken = default)
         {
             _request.Stream = false;
-            return _client.ExecuteAsync<CompletionResult>(_configuration.CompletionUri, _request, cancellationToken);
+            return _client.ExecuteAsync<ChatResult>(_configuration.ChatUri, _request, cancellationToken);
         }
         /// <summary>
         /// Specifies where the results should stream and be returned at one time.
         /// </summary>
         /// <returns>Builder</returns>
-        public IAsyncEnumerable<CompletionResult> ExecuteAsStreamAsync(CancellationToken cancellationToken = default)
+        public IAsyncEnumerable<ChatResult> ExecuteAsStreamAsync(CancellationToken cancellationToken = default)
         {
             _request.Stream = true;
-            return _client.ExecuteStreamAsync<CompletionResult>(_configuration.CompletionUri, _request, cancellationToken);
+            return _client.ExecuteStreamAsync<ChatResult>(_configuration.ChatUri, _request, cancellationToken);
         }
         /// <summary>
         /// Add a message to the request
@@ -87,7 +68,7 @@ namespace Azure.Ai.OpenAi
         /// </summary>
         /// <param name="value">Value</param>
         /// <returns>Builder</returns>
-        public CompletionRequestBuilder WithModel(ModelType model)
+        public ChatRequestBuilder WithModel(ModelType model)
         {
             _request.ModelId = Model.FromModelType(model).Id;
             return this;
@@ -97,42 +78,22 @@ namespace Azure.Ai.OpenAi
         /// </summary>
         /// <param name="value">Value</param>
         /// <returns>Builder</returns>
-        public CompletionRequestBuilder WithModel(string modelId)
+        public ChatRequestBuilder WithModel(string modelId)
         {
             _request.ModelId = modelId;
             return this;
         }
         /// <summary>
-        /// The suffix that comes after a completion of inserted text. Defaults to null.
-        /// </summary>
-        /// <param name="suffix">Suffix</param>
-        /// <returns>Builder</returns>
-        public CompletionRequestBuilder WithSuffix(string suffix)
-        {
-            _request.Suffix = suffix;
-            return this;
-        }
-        /// <summary>
-        /// How many tokens to complete to. Can return fewer if a stop sequence is hit.  Defaults to 16.
+        /// What sampling temperature to use, between 0 and 2. Higher values like 0.8 will make the output more random, while lower values like 0.2 will make it more focused and deterministic. We generally recommend altering this or Nucleus sampling but not both.
         /// </summary>
         /// <param name="value">Value</param>
         /// <returns>Builder</returns>
-        public CompletionRequestBuilder SetMaxTokens(int value)
-        {
-            _request.MaxTokens = value;
-            return this;
-        }
-        /// <summary>
-        /// What sampling temperature to use. Higher values means the model will take more risks. Try 0.9 for more creative applications, and 0 (argmax sampling) for ones with a well-defined answer. It is generally recommend to use this or Nuclues sampling (TopP) but not both.
-        /// </summary>
-        /// <param name="value">Value</param>
-        /// <returns>Builder</returns>
-        public CompletionRequestBuilder WithTemperature(double value)
+        public ChatRequestBuilder WithTemperature(double value)
         {
             if (value < 0)
                 throw new ArgumentException("Temperature with a value lesser than 0");
-            if (value > 1)
-                throw new ArgumentException("Temperature with a value greater than 1");
+            if (value > 2)
+                throw new ArgumentException("Temperature with a value greater than 2");
             _request.Temperature = value;
             return this;
         }
@@ -141,7 +102,7 @@ namespace Azure.Ai.OpenAi
         /// </summary>
         /// <param name="value">Value</param>
         /// <returns>Builder</returns>
-        public CompletionRequestBuilder WithNucleusSampling(double value)
+        public ChatRequestBuilder WithNucleusSampling(double value)
         {
             if (value < 0)
                 throw new ArgumentException("Nucleus sampling with a value lesser than 0");
@@ -151,32 +112,13 @@ namespace Azure.Ai.OpenAi
             return this;
         }
         /// <summary>
-        /// How many different choices to request for each prompt.  Defaults to 1.
+        /// How many different choices to request for each prompt. Defaults to 1.
         /// </summary>
         /// <param name="value">Value</param>
         /// <returns>Builder</returns>
-        public CompletionRequestBuilder WithNumberOfChoicesPerPrompt(int value)
+        public ChatRequestBuilder WithNumberOfChoicesPerPrompt(int value)
         {
             _request.NumberOfChoicesPerPrompt = value;
-            return this;
-        }
-        /// <summary>
-        /// Include the log probabilities on the logprobs most likely tokens, which can be found in <see cref="CompletionResult.Completions"/> -> <see cref="Choice.Logprobs"/>. So for example, if logprobs is 5, the API will return a list of the 5 most likely tokens. If logprobs is supplied, the API will always return the logprob of the sampled token, so there may be up to logprobs+1 elements in the response. The maximum value for logprobs is 5.
-        /// </summary>
-        /// <param name="value">Value</param>
-        /// <returns>Builder</returns>
-        public CompletionRequestBuilder WithLogProbs(int value)
-        {
-            _request.Logprobs = value;
-            return this;
-        }
-        /// <summary>
-        /// Echo back the prompt in addition to the completion.
-        /// </summary>
-        /// <returns>Builder</returns>
-        public CompletionRequestBuilder WithEcho()
-        {
-            _request.Echo = true;
             return this;
         }
         /// <summary>
@@ -184,7 +126,7 @@ namespace Azure.Ai.OpenAi
         /// </summary>
         /// <param name="values">Sequences</param>
         /// <returns>Builder</returns>
-        public CompletionRequestBuilder WithStopSequence(params string[] values)
+        public ChatRequestBuilder WithStopSequence(params string[] values)
         {
             if (values.Length > 1)
                 _request.StopSequence = values;
@@ -193,56 +135,74 @@ namespace Azure.Ai.OpenAi
             return this;
         }
         /// <summary>
-        /// The scale of the penalty for how often a token is used.  Should generally be between 0 and 1, although negative numbers are allowed to encourage token reuse.  Defaults to 0.
+        /// One or more sequences where the API will stop generating further tokens. The returned text will not contain the stop sequence.
         /// </summary>
-        /// <param name="value">Value</param>
+        /// <param name="value">Sequences</param>
         /// <returns>Builder</returns>
-        public CompletionRequestBuilder WithFrequencyPenalty(double value)
+        public ChatRequestBuilder AddStopSequence(string value)
         {
-            if (value < -1)
-                throw new ArgumentException("Frequency penalty with a value lesser than -1");
-            if (value > 1)
-                throw new ArgumentException("Frequency penalty with a value greater than 1");
-            _request.FrequencyPenalty = value;
+            if (_request.StopSequence == null)
+                _request.StopSequence = value;
+            else if (_request.StopSequence is string stringableSequence)
+                _request.StopSequence = new string[2] { stringableSequence, value };
+            else if (_request.StopSequence is string[] array)
+            {
+                var newArray = new string[array.Length + 1];
+                array.CopyTo(newArray, 0);
+                newArray[^1] = value;
+                _request.StopSequence = newArray;
+            }
             return this;
         }
         /// <summary>
-        /// The scale of the penalty applied if a token is already present at all.  Should generally be between 0 and 1, although negative numbers are allowed to encourage token reuse.  Defaults to 0.
+        /// The maximum number of tokens allowed for the generated answer. By default, the number of tokens the model can return will be (4096 - prompt tokens).
         /// </summary>
         /// <param name="value">Value</param>
         /// <returns>Builder</returns>
-        public CompletionRequestBuilder WithPresencePenalty(double value)
+        public ChatRequestBuilder SetMaxTokens(int value)
         {
-            if (value < -1)
-                throw new ArgumentException("Presence penalty with a value lesser than -1");
-            if (value > 1)
-                throw new ArgumentException("Presence penalty with a value greater than 1");
+            _request.MaxTokens = value;
+            return this;
+        }
+        /// <summary>
+        /// Number between -2.0 and 2.0. Positive values penalize new tokens based on whether they appear in the text so far, increasing the model's likelihood to talk about new topics.
+        /// <see href="https://platform.openai.com/docs/api-reference/parameter-details"></see>
+        /// </summary>
+        /// <param name="value">Value</param>
+        /// <returns>Builder</returns>
+        public ChatRequestBuilder WithPresencePenalty(double value)
+        {
+            if (value < -2)
+                throw new ArgumentException("Presence penalty with a value lesser than -2");
+            if (value > 2)
+                throw new ArgumentException("Presence penalty with a value greater than 2");
             _request.PresencePenalty = value;
             return this;
         }
         /// <summary>
-        /// Generates best_of completions server-side and returns the "best" (the one with the highest log probability per token). Results cannot be streamed.
-        /// When used with n, best_of controls the number of candidate completions and n specifies how many to return – best_of must be greater than n.
-        /// Note: Because this parameter generates many completions, it can quickly consume your token quota.Use carefully and ensure that you have reasonable settings for max_tokens and stop.
+        /// Number between -2.0 and 2.0. Positive values penalize new tokens based on their existing frequency in the text so far, decreasing the model's likelihood to repeat the same line verbatim.
+        /// <see href="https://platform.openai.com/docs/api-reference/parameter-details"></see>
         /// </summary>
         /// <param name="value">Value</param>
         /// <returns>Builder</returns>
-        public CompletionRequestBuilder BestOf(int value)
+        public ChatRequestBuilder WithFrequencyPenalty(double value)
         {
-            _request.Stream = false;
-            _request.BestOf = value;
+            if (value < -2)
+                throw new ArgumentException("Frequency penalty with a value lesser than -2");
+            if (value > 2)
+                throw new ArgumentException("Frequency penalty with a value greater than 2");
+            _request.FrequencyPenalty = value;
             return this;
         }
+
         /// <summary>
         /// Modify the likelihood of specified tokens appearing in the completion.
-        /// Accepts a json object that maps tokens(specified by their token ID in the GPT tokenizer) to an associated bias value from -100 to 100. You can use this tokenizer tool (which works for both GPT-2 and GPT-3) to convert text to token IDs. Mathematically, the bias is added to the logits generated by the model prior to sampling. The exact effect will vary per model, but values between -1 and 1 should decrease or increase likelihood of selection; values like -100 or 100 should result in a ban or exclusive selection of the relevant token.
-        /// As an example, you can pass { "50256": -100}
-        /// to prevent the <|endoftext|> token from being generated.
+        /// Accepts a json object that maps tokens (specified by their token ID in the tokenizer) to an associated bias value from -100 to 100. Mathematically, the bias is added to the logits generated by the model prior to sampling. The exact effect will vary per model, but values between -1 and 1 should decrease or increase likelihood of selection; values like -100 or 100 should result in a ban or exclusive selection of the relevant token.
         /// </summary>
         /// <param name="key"></param>
         /// <param name="value"></param>
         /// <returns>Builder</returns>
-        public CompletionRequestBuilder WithBias(string key, int value)
+        public ChatRequestBuilder WithBias(string key, int value)
         {
             _request.Bias ??= new Dictionary<string, int>();
             if (!_request.Bias.ContainsKey(key))
@@ -253,13 +213,11 @@ namespace Azure.Ai.OpenAi
         }
         /// <summary>
         /// Modify the likelihood of specified tokens appearing in the completion.
-        /// Accepts a json object that maps tokens(specified by their token ID in the GPT tokenizer) to an associated bias value from -100 to 100. You can use this tokenizer tool (which works for both GPT-2 and GPT-3) to convert text to token IDs. Mathematically, the bias is added to the logits generated by the model prior to sampling. The exact effect will vary per model, but values between -1 and 1 should decrease or increase likelihood of selection; values like -100 or 100 should result in a ban or exclusive selection of the relevant token.
-        /// As an example, you can pass { "50256": -100}
-        /// to prevent the <|endoftext|> token from being generated.
+        /// Accepts a json object that maps tokens (specified by their token ID in the tokenizer) to an associated bias value from -100 to 100. Mathematically, the bias is added to the logits generated by the model prior to sampling. The exact effect will vary per model, but values between -1 and 1 should decrease or increase likelihood of selection; values like -100 or 100 should result in a ban or exclusive selection of the relevant token.
         /// </summary>
         /// <param name="bias"></param>
         /// <returns>Builder</returns>
-        public CompletionRequestBuilder WithBias(Dictionary<string, int> bias)
+        public ChatRequestBuilder WithBias(Dictionary<string, int> bias)
         {
             foreach (var c in bias)
                 WithBias(c.Key, c.Value);
@@ -267,10 +225,11 @@ namespace Azure.Ai.OpenAi
         }
         /// <summary>
         /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
+        /// <see href="https://platform.openai.com/docs/guides/safety-best-practices/end-user-ids"></see>
         /// </summary>
         /// <param name="user">Unique identifier</param>
         /// <returns>Builder</returns>
-        public CompletionRequestBuilder WithUser(string user)
+        public ChatRequestBuilder WithUser(string user)
         {
             _request.User = user;
             return this;

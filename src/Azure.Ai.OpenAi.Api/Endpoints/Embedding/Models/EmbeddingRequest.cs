@@ -2,11 +2,13 @@
 
 namespace Azure.Ai.OpenAi.Embedding
 {
-    internal sealed class EmbeddingRequest
+    public sealed class EmbeddingRequest : IOpenAiRequest
     {
         [JsonPropertyName("model")]
         public string ModelId { get; set; }
         [JsonPropertyName("input")]
-        public string Input { get; set; }
+        public object Input { get; set; }
+        [JsonPropertyName("user")]
+        public object User { get; set; }
     }
 }

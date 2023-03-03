@@ -1,9 +1,8 @@
 ﻿using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
-using Azure.Ai.OpenAi.Models;
 
-namespace Azure.Ai.OpenAi
+namespace Azure.Ai.OpenAi.Models
 {
     /// <summary>
     /// List and describe the various models available in the API. 

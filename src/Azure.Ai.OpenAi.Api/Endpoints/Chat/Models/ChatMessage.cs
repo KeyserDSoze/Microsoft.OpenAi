@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Azure.Ai.OpenAi.Completions
+namespace Azure.Ai.OpenAi.Chat
 {
     public sealed class ChatMessage
     {

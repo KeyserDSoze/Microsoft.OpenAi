@@ -6,119 +6,78 @@ using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Azure.Ai.OpenAi.Endpoints.Image.Models;
+using Azure.Ai.OpenAi.Models;
 
-namespace Azure.Ai.OpenAi
+namespace Azure.Ai.OpenAi.Image
 {
-    public sealed class ImageEditRequestBuilder
+    public sealed class ImageEditRequestBuilder : RequestBuilder<ImageEditRequest>
     {
-        private readonly HttpClient _client;
-        private readonly OpenAiConfiguration _configuration;
-        private readonly ImageEditRequest _imageEditRequest;
+        private static readonly List<Model> s_models = new List<Model>();
+        public override List<Model> AvailableModels => s_models;
         internal ImageEditRequestBuilder(HttpClient client, OpenAiConfiguration configuration, string prompt,
-            Stream image, string imageName)
-        {
-            _client = client;
-            _configuration = configuration;
-            _imageEditRequest = new ImageEditRequest()
+            Stream image, string imageName) :
+            base(client, configuration, () =>
             {
-                Prompt = prompt,
-                NumberOfResults = 1,
-                Size = "1024x1024",
-            };
-            var memoryStream = new MemoryStream();
-            image.CopyTo(memoryStream);
-            _imageEditRequest.Image = memoryStream;
-            _imageEditRequest.ImageName = imageName;
+                var request = new ImageEditRequest()
+                {
+                    Prompt = prompt,
+                    NumberOfResults = 1,
+                    Size = ImageSize.Large.AsString()
+                };
+                var memoryStream = new MemoryStream();
+                image.CopyTo(memoryStream);
+                request.Image = memoryStream;
+                request.ImageName = imageName;
+                return request;
+            })
+        {
         }
         /// <summary>
-        /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
+        /// Edit an image given a prompt.
         /// </summary>
-        /// <param name="user">Unique identifier</param>
-        /// <returns>Builder</returns>
-        public ImageEditRequestBuilder WithUser(string user)
-        {
-            _imageEditRequest.User = user;
-            return this;
-        }
-        public ImageEditRequestBuilder WithNumberOfResults(int numberOfResults)
-        {
-            if (numberOfResults > 10 || numberOfResults < 1)
-                throw new ArgumentOutOfRangeException(nameof(numberOfResults), "The number of results must be between 1 and 10");
-            _imageEditRequest.NumberOfResults = numberOfResults;
-            return this;
-        }
-        public ImageEditRequestBuilder WithSize(ImageSize size)
-        {
-            switch (size)
-            {
-                case ImageSize.Small:
-                    _imageEditRequest.Size = "256x256";
-                    break;
-                case ImageSize.Medium:
-                    _imageEditRequest.Size = "512x512";
-                    break;
-                default:
-                    _imageEditRequest.Size = "1024x1024";
-                    break;
-            }
-            return this;
-        }
-        public ImageEditRequestBuilder WithMask(Stream mask, string maskName = "mask.png")
-        {
-            var memoryStream = new MemoryStream();
-            mask.CopyTo(memoryStream);
-            _imageEditRequest.Mask = memoryStream;
-            _imageEditRequest.MaskName = maskName;
-            return this;
-        }
-        /// <summary>
-        /// Creates an image given a prompt.
-        /// </summary>
-        /// <param name="request"><see cref="ImageGenerationRequest"/></param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>A list of generated texture urls to download.</returns>
         /// <exception cref="HttpRequestException"></exception>
-        public async ValueTask<ImagesResponse> ExecuteAsync(CancellationToken cancellationToken = default)
+        public async ValueTask<ImageResult> GetUrlAsync(CancellationToken cancellationToken = default)
         {
+            _request.ResponseFormat = ImageCreateRequestBuilder.ResponseFormatUrl;
             using var content = new MultipartFormDataContent();
             using var imageData = new MemoryStream();
-            await _imageEditRequest.Image.CopyToAsync(imageData, cancellationToken);
+            await _request.Image.CopyToAsync(imageData, cancellationToken);
             imageData.Position = 0;
-            content.Add(new ByteArrayContent(imageData.ToArray()), "image", _imageEditRequest.ImageName);
+            content.Add(new ByteArrayContent(imageData.ToArray()), "image", _request.ImageName);
 
-            if (_imageEditRequest.Mask != null)
+            if (_request.Mask != null)
             {
                 using var maskData = new MemoryStream();
-                await _imageEditRequest.Mask.CopyToAsync(maskData, cancellationToken);
+                await _request.Mask.CopyToAsync(maskData, cancellationToken);
                 maskData.Position = 0;
-                content.Add(new ByteArrayContent(maskData.ToArray()), "mask", _imageEditRequest.MaskName);
+                content.Add(new ByteArrayContent(maskData.ToArray()), "mask", _request.MaskName);
             }
 
-            content.Add(new StringContent(_imageEditRequest.Prompt), "prompt");
-            content.Add(new StringContent(_imageEditRequest.NumberOfResults.ToString()), "n");
-            content.Add(new StringContent(_imageEditRequest.Size), "size");
+            content.Add(new StringContent(_request.Prompt), "prompt");
+            content.Add(new StringContent(_request.NumberOfResults.ToString()), "n");
+            content.Add(new StringContent(_request.Size), "size");
 
-            if (!string.IsNullOrWhiteSpace(_imageEditRequest.User))
+            if (!string.IsNullOrWhiteSpace(_request.User))
             {
-                content.Add(new StringContent(_imageEditRequest.User), "user");
+                content.Add(new StringContent(_request.User), "user");
             }
-            _imageEditRequest.Dispose();
+            _request.Dispose();
 
-            var response = await _client.ExecuteAsync<ImagesResponse>($"{_configuration.ImageUri}/edits", content, cancellationToken);
+            var response = await _client.ExecuteAsync<ImageResult>($"{_configuration.ImageUri}/edits", content, cancellationToken);
             return response;
         }
         /// <summary>
-        /// Creates an image given a prompt.
+        /// Edit an image given a prompt.
         /// </summary>
-        /// <param name="request"><see cref="ImageGenerationRequest"/></param>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>A list of generated texture urls to download.</returns>
         /// <exception cref="HttpRequestException"></exception>
         public async IAsyncEnumerable<Stream> DownloadAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             var uri = $"{_configuration.ImageUri}/generations";
-            var responses = await _client.ExecuteAsync<ImagesResponse>(uri, _imageEditRequest, cancellationToken);
+            var responses = await _client.ExecuteAsync<ImageResult>(uri, _request, cancellationToken);
             using var client = new HttpClient();
             foreach (var image in responses.Data)
             {
@@ -134,6 +93,54 @@ namespace Azure.Ai.OpenAi
                     yield return memoryStream;
                 }
             }
+        }
+        /// <summary>
+        /// The number of images to generate. Must be between 1 and 10.
+        /// </summary>
+        /// <param name="numberOfResults"></param>
+        /// <returns></returns>
+        /// <exception cref="ArgumentOutOfRangeException"></exception>
+        public ImageEditRequestBuilder WithNumberOfResults(int numberOfResults)
+        {
+            if (numberOfResults > 10 || numberOfResults < 1)
+                throw new ArgumentOutOfRangeException(nameof(numberOfResults), "The number of results must be between 1 and 10");
+            _request.NumberOfResults = numberOfResults;
+            return this;
+        }
+        /// <summary>
+        /// The size of the generated images. Must be one of 256x256, 512x512, or 1024x1024.
+        /// </summary>
+        /// <param name="size"></param>
+        /// <returns></returns>
+        public ImageEditRequestBuilder WithSize(ImageSize size)
+        {
+            _request.Size = size.AsString();
+            return this;
+        }
+        /// <summary>
+        /// An additional image whose fully transparent areas (e.g. where alpha is zero) indicate where image should be edited. Must be a valid PNG file, less than 4MB, and have the same dimensions as image.
+        /// </summary>
+        /// <param name="mask"></param>
+        /// <param name="maskName"></param>
+        /// <returns></returns>
+        public ImageEditRequestBuilder WithMask(Stream mask, string maskName = "mask.png")
+        {
+            var memoryStream = new MemoryStream();
+            mask.CopyTo(memoryStream);
+            _request.Mask = memoryStream;
+            _request.MaskName = maskName;
+            return this;
+        }
+        /// <summary>
+        /// A unique identifier representing your end-user, which can help OpenAI to monitor and detect abuse.
+        /// <see href="https://platform.openai.com/docs/guides/safety-best-practices/end-user-ids"></see>
+        /// </summary>
+        /// <param name="user">Unique identifier</param>
+        /// <returns>Builder</returns>
+        public ImageEditRequestBuilder WithUser(string user)
+        {
+            _request.User = user;
+            return this;
         }
     }
 }
