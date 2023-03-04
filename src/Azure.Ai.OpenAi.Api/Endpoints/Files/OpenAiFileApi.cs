@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
+using static System.Net.WebRequestMethods;
 
 namespace Azure.Ai.OpenAi.File
 {
@@ -19,7 +20,7 @@ namespace Azure.Ai.OpenAi.File
 
         public async Task<List<FileResult>> AllAsync(CancellationToken cancellationToken = default)
         {
-            var response = await _client.ExecuteAsync<FilesData>(_configuration.FileUri, null, cancellationToken);
+            var response = await _client.ExecuteAsync<FilesData>(_configuration.GetUri(OpenAi.File, string.Empty), null, cancellationToken);
             return response.Data ?? new List<FileResult>();
         }
         private const string Purpose = "purpose";
@@ -33,15 +34,15 @@ namespace Azure.Ai.OpenAi.File
                 { new StringContent(purpose), Purpose },
                 { new ByteArrayContent(memoryStream.ToArray()), FileContent, fileName }
             };
-            return _client.ExecuteAsync<FileResult>(_configuration.FileUri, content, cancellationToken);
+            return _client.ExecuteAsync<FileResult>(_configuration.GetUri(OpenAi.File, fileName), content, cancellationToken);
         }
         public ValueTask<FileResult> DeleteAsync(string fileId, CancellationToken cancellationToken = default)
-            => _client.DeleteAsync<FileResult>($"{_configuration.FileUri}/{fileId}", null, cancellationToken);
+            => _client.DeleteAsync<FileResult>($"{_configuration.GetUri(OpenAi.File, fileId)}/{fileId}", null, cancellationToken);
         public ValueTask<FileResult> RetrieveAsync(string fileId, CancellationToken cancellationToken = default)
-            => _client.ExecuteAsync<FileResult>($"{_configuration.FileUri}/{fileId}", null, cancellationToken);
+            => _client.ExecuteAsync<FileResult>($"{_configuration.GetUri(OpenAi.File, fileId)}/{fileId}", null, cancellationToken);
         public async Task<string> RetrieveFileContentAsStringAsync(string fileId, CancellationToken cancellationToken = default)
         {
-            var response = await _client.PrivatedExecuteAsync($"{_configuration.FileUri}/{fileId}/content", null, false, false, false, cancellationToken);
+            var response = await _client.PrivatedExecuteAsync($"{_configuration.GetUri(OpenAi.File, fileId)}/{fileId}/content", null, false, false, false, cancellationToken);
             return await response.Content.ReadAsStringAsync();
         }
         private sealed class FilesData : ApiBaseResponse

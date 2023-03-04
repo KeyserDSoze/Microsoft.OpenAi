@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using Azure.Ai.OpenAi.Completions;
+using Azure.Ai.OpenAi.Completion;
 using Azure.Ai.OpenAi.Models;
 using Xunit;
 
@@ -18,7 +18,7 @@ namespace Azure.OpenAi.Test
 
             var results = await api.Completion
                 .Request("One Two Three Four Five Six Seven Eight Nine One Two Three Four Five Six Seven Eight")
-                .WithModel(ModelType.CurieText)
+                .WithModel(TextModelType.CurieText)
                 .WithTemperature(0.1)
                 .SetMaxTokens(5)
                 .ExecuteAsync();
@@ -60,7 +60,7 @@ namespace Azure.OpenAi.Test
 
             var results = await api.Completion
                .Request("One Two Three Four Five Six Seven Eight Nine One Two Three Four Five Six Seven Eight")
-               .WithModel(ModelType.CurieText)
+               .WithModel(TextModelType.CurieText)
                .WithTemperature(0.1)
                .SetMaxTokens(5)
                .ExecuteAsync();

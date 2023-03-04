@@ -23,7 +23,7 @@ namespace Azure.Ai.OpenAi.Embedding
         /// </summary>
         /// <returns>Builder</returns>
         public ValueTask<EmbeddingResult> ExecuteAsync(CancellationToken cancellationToken = default)
-            => _client.ExecuteAsync<EmbeddingResult>(_configuration.EmbeddingUri, _request, cancellationToken);
+            => _client.ExecuteAsync<EmbeddingResult>(_configuration.GetUri(OpenAi.Embedding,_request.ModelId!), _request, cancellationToken);
         /// <summary>
         /// Add further input to the request.
         /// </summary>

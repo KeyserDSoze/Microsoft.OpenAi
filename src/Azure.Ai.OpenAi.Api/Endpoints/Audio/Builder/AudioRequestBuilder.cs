@@ -54,7 +54,7 @@ namespace Azure.Ai.OpenAi.Audio
 
             _request.Dispose();
 
-            var response = await _client.ExecuteAsync<AudioResult>(_configuration.AudioTranscriptionUri, content, cancellationToken);
+            var response = await _client.ExecuteAsync<AudioResult>(_configuration.GetUri(OpenAi.AudioTranscription, _request.ModelId!), content, cancellationToken);
             return response;
         }
         /// <summary>
@@ -82,7 +82,7 @@ namespace Azure.Ai.OpenAi.Audio
 
             _request.Dispose();
 
-            var response = await _client.ExecuteAsync<AudioResult>(_configuration.AudioTranslationUri, content, cancellationToken);
+            var response = await _client.ExecuteAsync<AudioResult>(_configuration.GetUri(OpenAi.AudioTranslation, _request.ModelId!), content, cancellationToken);
             return response;
         }
         /// <summary>

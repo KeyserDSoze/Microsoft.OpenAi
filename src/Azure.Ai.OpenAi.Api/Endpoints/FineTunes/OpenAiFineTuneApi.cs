@@ -16,14 +16,14 @@ namespace Azure.Ai.OpenAi.FineTune
         public FineTuneRequestBuilder Create(string trainingFileId)
             => new FineTuneRequestBuilder(_client, _configuration, trainingFileId);
         public ValueTask<FineTuneResults> ListAsync(string fineTuneId, CancellationToken cancellationToken = default)
-            => _client.ExecuteAsync<FineTuneResults>(_configuration.FineTuneUri, null, cancellationToken);
+            => _client.ExecuteAsync<FineTuneResults>(_configuration.GetUri(OpenAi.FineTune, fineTuneId), null, cancellationToken);
         public ValueTask<FineTuneResult> RetrieveAsync(string fineTuneId, CancellationToken cancellationToken = default)
-            => _client.ExecuteAsync<FineTuneResult>($"{_configuration.FineTuneUri}/{fineTuneId}", null, cancellationToken);
+            => _client.ExecuteAsync<FineTuneResult>($"{_configuration.GetUri(OpenAi.FineTune, fineTuneId)}/{fineTuneId}", null, cancellationToken);
         public ValueTask<FineTuneResult> CancelAsync(string fineTuneId, CancellationToken cancellationToken = default)
-            => _client.ExecuteAsync<FineTuneResult>($"{_configuration.FineTuneUri}/{fineTuneId}/cancel", null, cancellationToken, true);
+            => _client.ExecuteAsync<FineTuneResult>($"{_configuration.GetUri(OpenAi.FineTune, fineTuneId)}/{fineTuneId}/cancel", null, cancellationToken, true);
         public ValueTask<FineTuneEventsResult> ListEventsAsync(string fineTuneId, CancellationToken cancellationToken = default)
-            => _client.ExecuteAsync<FineTuneEventsResult>($"{_configuration.FineTuneUri}/{fineTuneId}/events", null, cancellationToken);
+            => _client.ExecuteAsync<FineTuneEventsResult>($"{_configuration.GetUri(OpenAi.FineTune, fineTuneId)}/{fineTuneId}/events", null, cancellationToken);
         public ValueTask<FineTuneDeleteResult> DeleteAsync(string fineTuneId, CancellationToken cancellationToken = default)
-            => _client.DeleteAsync<FineTuneDeleteResult>($"{_configuration.ModelUri}/{fineTuneId}", null, cancellationToken);
+            => _client.DeleteAsync<FineTuneDeleteResult>($"{_configuration.GetUri(OpenAi.Model, fineTuneId)}/{fineTuneId}", null, cancellationToken);
     }
 }

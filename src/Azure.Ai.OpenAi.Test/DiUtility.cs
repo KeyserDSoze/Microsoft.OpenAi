@@ -28,7 +28,9 @@ namespace Azure.OpenAi.Test
             {
                 settings.ApiKey = apiKey;
                 settings.Azure.ResourceName = resourceName;
-                settings.Azure.DeploymentId = deploymentId;
+                settings
+                    .Azure
+                    .AddDeploymentModel(deploymentId, Ai.OpenAi.Models.TextModelType.CurieText);
             });
             return services;
         }
@@ -36,7 +38,7 @@ namespace Azure.OpenAi.Test
             => serviceProvider = services.BuildServiceProvider().CreateScope().ServiceProvider;
         public static IOpenAiApi GetOpenAi()
         {
-            var services = CreateDependencyInjectionWithConfiguration(out var configuration);
+            var services = CreateDependencyInjectionWithConfiguration(out _);
             _ = services.Finalize(out var serviceProvider);
             return serviceProvider.CreateScope().ServiceProvider.GetService<IOpenAiApi>();
         }

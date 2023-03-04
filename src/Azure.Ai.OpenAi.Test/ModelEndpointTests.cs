@@ -28,7 +28,7 @@ namespace Azure.OpenAi.Test
 
             Assert.NotNull(api.Model);
 
-            var result = await api.Model.RetrieveAsync(Model.DavinciText.Id);
+            var result = await api.Model.RetrieveAsync(TextModelType.DavinciText3.ToModel().Id);
             Assert.NotNull(result);
 
             Assert.NotNull(result.CreatedUnixTime);
@@ -39,7 +39,7 @@ namespace Azure.OpenAi.Test
 
             Assert.NotNull(result.Id);
             Assert.NotNull(result.OwnedBy);
-            Assert.Equal(Model.DavinciText.Id.ToLower(), result.Id.ToLower());
+            Assert.Equal(TextModelType.DavinciText3.ToModel().Id, result.Id.ToLower());
         }
 
 

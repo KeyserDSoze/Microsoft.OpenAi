@@ -28,7 +28,7 @@ namespace Azure.Ai.OpenAi.Completion
         public ValueTask<CompletionResult> ExecuteAsync(CancellationToken cancellationToken = default)
         {
             _request.Stream = false;
-            return _client.ExecuteAsync<CompletionResult>(_configuration.CompletionUri, _request, cancellationToken);
+            return _client.ExecuteAsync<CompletionResult>(_configuration.GetUri(OpenAi.Completion, _request.ModelId!), _request, cancellationToken);
         }
         /// <summary>
         /// Specifies where the results should stream and be returned at one time.
@@ -38,7 +38,7 @@ namespace Azure.Ai.OpenAi.Completion
         {
             _request.Stream = true;
             _request.BestOf = null;
-            return _client.ExecuteStreamAsync<CompletionResult>(_configuration.CompletionUri, _request, cancellationToken);
+            return _client.ExecuteStreamAsync<CompletionResult>(_configuration.GetUri(OpenAi.Completion, _request.ModelId!), _request, cancellationToken);
         }
         /// <summary>
         /// Add further prompt to the request.

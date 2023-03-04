@@ -35,7 +35,7 @@ namespace Azure.Ai.OpenAi.Image
         public ValueTask<ImageResult> GetUrlAsync(CancellationToken cancellationToken = default)
         {
             _request.ResponseFormat = ResponseFormatUrl;
-            var uri = $"{_configuration.ImageUri}/generations";
+            var uri = $"{_configuration.GetUri(OpenAi.Image, _request.ModelId!)}/generations";
             return _client.ExecuteAsync<ImageResult>(uri, _request, cancellationToken);
         }
         /// <summary>

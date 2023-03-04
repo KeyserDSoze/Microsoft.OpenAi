@@ -16,10 +16,10 @@ namespace Azure.Ai.OpenAi.Models
             _configuration = configuration;
         }
         public ValueTask<Model> RetrieveAsync(string id, CancellationToken cancellationToken = default)
-            => _client.ExecuteAsync<Model>($"{_configuration.ModelUri}/{id}", null, cancellationToken);
+            => _client.ExecuteAsync<Model>($"{_configuration.GetUri(OpenAi.Model, string.Empty)}/{id}", null, cancellationToken);
         public async Task<List<Model>> ListAsync(CancellationToken cancellationToken = default)
         {
-            var response = await _client.ExecuteAsync<JsonHelperRoot>(_configuration.ModelUri, null, cancellationToken);
+            var response = await _client.ExecuteAsync<JsonHelperRoot>(_configuration.GetUri(OpenAi.Model, string.Empty), null, cancellationToken);
             return response.Data!;
         }
         private sealed class JsonHelperRoot : ApiBaseResponse

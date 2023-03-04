@@ -11,6 +11,10 @@ using Azure.Ai.OpenAi.Moderation;
 
 namespace Azure.Ai.OpenAi
 {
+    public interface IOpenAiApiFactory
+    {
+        IOpenAiApi CreateApi();
+    }
     public interface IOpenAiApi
     {
         IOpenAiModelApi Model { get; }

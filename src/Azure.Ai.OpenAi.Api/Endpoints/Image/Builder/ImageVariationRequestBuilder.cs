@@ -54,7 +54,7 @@ namespace Azure.Ai.OpenAi.Image
                 content.Add(new StringContent(_request.User), "user");
             _request.Dispose();
 
-            var response = await _client.ExecuteAsync<ImageResult>($"{_configuration.ImageUri}/variations", content, cancellationToken);
+            var response = await _client.ExecuteAsync<ImageResult>($"{_configuration.GetUri(OpenAi.Image, _request.ModelId!)}/variations", content, cancellationToken);
             return response;
         }
         /// <summary>
@@ -65,7 +65,7 @@ namespace Azure.Ai.OpenAi.Image
         /// <exception cref="HttpRequestException"></exception>
         public async IAsyncEnumerable<Stream> DownloadAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
-            var uri = $"{_configuration.ImageUri}/generations";
+            var uri = $"{_configuration.GetUri(OpenAi.Image, _request.ModelId!)}/generations";
             var responses = await _client.ExecuteAsync<ImageResult>(uri, _request, cancellationToken);
             if (responses.Data != null)
             {

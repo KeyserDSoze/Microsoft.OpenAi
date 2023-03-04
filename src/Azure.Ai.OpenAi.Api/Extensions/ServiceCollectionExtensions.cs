@@ -29,7 +29,10 @@ namespace Microsoft.Extensions.DependencyInjection
             services.AddSingleton(new OpenAiConfiguration(openAiSettings));
             var httpClientBuilder = services.AddHttpClient(OpenAiSettings.HttpClientName, client =>
             {
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", openAiSettings.ApiKey);
+                if (openAiSettings.Azure.HasConfiguration)
+                    client.DefaultRequestHeaders.Add("api-key", openAiSettings.ApiKey);
+                else
+                    client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", openAiSettings.ApiKey);
                 if (!string.IsNullOrEmpty(openAiSettings.OrganizationName))
                     client.DefaultRequestHeaders.Add("OpenAI-Organization", openAiSettings.OrganizationName);
 
