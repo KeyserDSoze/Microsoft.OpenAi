@@ -95,6 +95,7 @@ namespace Azure.Ai.OpenAi.Models
         public static Model Gpt35Turbo0301 { get; } = new Model("gpt-3.5-turbo-0301");
         public static Model TextDavinciEdit { get; } = new Model("text-davinci-edit-001");
         public static Model CodeDavinciEdit { get; } = new Model("code-davinci-edit-001");
+        public static List<Model> Empty { get; } = new List<Model>();
         public static List<Model> All { get; } = new List<Model>()
         {
             AdaText,

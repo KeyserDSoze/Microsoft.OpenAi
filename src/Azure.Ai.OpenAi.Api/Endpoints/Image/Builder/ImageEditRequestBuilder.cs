@@ -12,8 +12,7 @@ namespace Azure.Ai.OpenAi.Image
 {
     public sealed class ImageEditRequestBuilder : RequestBuilder<ImageEditRequest>
     {
-        private static readonly List<Model> s_models = new List<Model>();
-        public override List<Model> AvailableModels => s_models;
+        public override List<Model> AvailableModels => Model.Empty;
         internal ImageEditRequestBuilder(HttpClient client, OpenAiConfiguration configuration, string prompt,
             Stream image, string imageName) :
             base(client, configuration, () =>

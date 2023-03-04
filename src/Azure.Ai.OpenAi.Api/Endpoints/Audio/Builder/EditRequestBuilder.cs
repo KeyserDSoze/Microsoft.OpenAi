@@ -6,67 +6,47 @@ using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
+using Azure.Ai.OpenAi.Image;
 using Azure.Ai.OpenAi.Models;
 
-namespace Azure.Ai.OpenAi.Image
+namespace Azure.Ai.OpenAi.Audio
 {
-    public sealed class ImageVariationRequestBuilder : RequestBuilder<ImageVariationRequest>
+    public sealed class AudioRequestBuilder : RequestBuilder<AudioTranscriptionRequest>
     {
         public override List<Model> AvailableModels => Model.Empty;
-        internal ImageVariationRequestBuilder(HttpClient client, OpenAiConfiguration configuration,
-            Stream image, string imageName)
-            : base(client, configuration, () =>
+        internal AudioRequestBuilder(HttpClient client, OpenAiConfiguration configuration, string instruction) :
+            base(client, configuration, () =>
             {
-                var request = new ImageVariationRequest()
+                return new AudioTranscriptionRequest
                 {
-                    NumberOfResults = 1,
-                    Size = "1024x1024",
+                    Instruction = instruction
                 };
-                var memoryStream = new MemoryStream();
-                image.CopyTo(memoryStream);
-                request.Image = memoryStream;
-                request.ImageName = imageName;
-                return request;
             })
         {
         }
+        internal const string ResponseFormatUrl = "url";
+        internal const string ResponseFormatB64Json = "b64_json";
         /// <summary>
-        /// Variate an image given a prompt.
+        /// Creates an image given a prompt.
         /// </summary>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>A list of generated texture urls to download.</returns>
         /// <exception cref="HttpRequestException"></exception>
-        public async ValueTask<ImageResult> ExecuteAsync(CancellationToken cancellationToken = default)
+        public ValueTask<ImageResult> GetUrlAsync(CancellationToken cancellationToken = default)
         {
-            _request.ResponseFormat = ImageCreateRequestBuilder.ResponseFormatUrl;
-            using var content = new MultipartFormDataContent();
-            using var imageData = new MemoryStream();
-            await _request.Image.CopyToAsync(imageData, cancellationToken);
-            imageData.Position = 0;
-            content.Add(new ByteArrayContent(imageData.ToArray()), "image", _request.ImageName);
-
-            content.Add(new StringContent(_request.NumberOfResults.ToString()), "n");
-            content.Add(new StringContent(_request.Size), "size");
-
-            if (!string.IsNullOrWhiteSpace(_request.User))
-            {
-                content.Add(new StringContent(_request.User), "user");
-            }
-            _request.Dispose();
-
-            var response = await _client.ExecuteAsync<ImageResult>($"{_configuration.ImageUri}/variations", content, cancellationToken);
-            return response;
+            _request.ResponseFormat = ResponseFormatUrl;
+            var uri = $"{_configuration.ImageUri}/generations";
+            return _client.ExecuteAsync<ImageResult>(uri, _request, cancellationToken);
         }
         /// <summary>
-        /// Variate an image given a prompt.
+        /// Creates an image given a prompt.
         /// </summary>
         /// <param name="cancellationToken">Optional, <see cref="CancellationToken"/>.</param>
         /// <returns>A list of generated texture urls to download.</returns>
         /// <exception cref="HttpRequestException"></exception>
         public async IAsyncEnumerable<Stream> DownloadAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
-            var uri = $"{_configuration.ImageUri}/generations";
-            var responses = await _client.ExecuteAsync<ImageResult>(uri, _request, cancellationToken);
+            var responses = await GetUrlAsync(cancellationToken);
             using var client = new HttpClient();
             foreach (var image in responses.Data)
             {
@@ -89,7 +69,7 @@ namespace Azure.Ai.OpenAi.Image
         /// <param name="numberOfResults"></param>
         /// <returns></returns>
         /// <exception cref="ArgumentOutOfRangeException"></exception>
-        public ImageVariationRequestBuilder WithNumberOfResults(int numberOfResults)
+        public AudioRequestBuilder WithNumberOfResults(int numberOfResults)
         {
             if (numberOfResults > 10 || numberOfResults < 1)
                 throw new ArgumentOutOfRangeException(nameof(numberOfResults), "The number of results must be between 1 and 10");
@@ -101,7 +81,7 @@ namespace Azure.Ai.OpenAi.Image
         /// </summary>
         /// <param name="size"></param>
         /// <returns></returns>
-        public ImageVariationRequestBuilder WithSize(ImageSize size)
+        public AudioRequestBuilder WithSize(ImageSize size)
         {
             _request.Size = size.AsString();
             return this;
@@ -112,7 +92,7 @@ namespace Azure.Ai.OpenAi.Image
         /// </summary>
         /// <param name="user">Unique identifier</param>
         /// <returns>Builder</returns>
-        public ImageVariationRequestBuilder WithUser(string user)
+        public AudioRequestBuilder WithUser(string user)
         {
             _request.User = user;
             return this;

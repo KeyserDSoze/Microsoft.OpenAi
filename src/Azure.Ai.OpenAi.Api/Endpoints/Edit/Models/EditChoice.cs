@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Azure.Ai.OpenAi.Completion
+namespace Azure.Ai.OpenAi.Edit
 {
     /// <summary>
     /// Represents a completion choice returned by the Completion API.  

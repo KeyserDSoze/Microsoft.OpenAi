@@ -12,8 +12,7 @@ namespace Azure.Ai.OpenAi.Image
 {
     public sealed class ImageCreateRequestBuilder : RequestBuilder<ImageCreateRequest>
     {
-        private static readonly List<Model> s_models = new List<Model>();
-        public override List<Model> AvailableModels => s_models;
+        public override List<Model> AvailableModels => Model.Empty;
         internal ImageCreateRequestBuilder(HttpClient client, OpenAiConfiguration configuration, string prompt)
             : base(client, configuration, () =>
             {
