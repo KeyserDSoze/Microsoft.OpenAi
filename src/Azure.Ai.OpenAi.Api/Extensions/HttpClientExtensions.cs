@@ -14,9 +14,9 @@ namespace Azure.Ai.OpenAi
 {
     public static class HttpClientExtensions
     {
-        internal static async Task<HttpResponseMessage> PrivatedExecuteAsync(this HttpClient client, string url, object? message, bool isStreaming, bool isDelete, CancellationToken cancellationToken)
+        internal static async Task<HttpResponseMessage> PrivatedExecuteAsync(this HttpClient client, string url, object? message, bool isStreaming, bool isDelete, bool forcePost, CancellationToken cancellationToken)
         {
-            var request = new HttpRequestMessage(isDelete ? HttpMethod.Delete : (message != null ? HttpMethod.Post : HttpMethod.Get), url);
+            var request = new HttpRequestMessage(isDelete ? HttpMethod.Delete : (message != null || forcePost ? HttpMethod.Post : HttpMethod.Get), url);
             if (message != null)
             {
                 if (message is HttpContent httpContent)
@@ -42,13 +42,13 @@ namespace Azure.Ai.OpenAi
         }
         internal static async ValueTask<TResponse> DeleteAsync<TResponse>(this HttpClient client, string url, object? message, CancellationToken cancellationToken)
         {
-            var response = await client.PrivatedExecuteAsync(url, message, false, true, cancellationToken);
+            var response = await client.PrivatedExecuteAsync(url, message, false, true, false, cancellationToken);
             var responseAsString = await response.Content.ReadAsStringAsync();
             return JsonSerializer.Deserialize<TResponse>(responseAsString)!;
         }
-        internal static async ValueTask<TResponse> ExecuteAsync<TResponse>(this HttpClient client, string url, object? message, CancellationToken cancellationToken)
+        internal static async ValueTask<TResponse> ExecuteAsync<TResponse>(this HttpClient client, string url, object? message, CancellationToken cancellationToken, bool forcePost = false)
         {
-            var response = await client.PrivatedExecuteAsync(url, message, false, false, cancellationToken);
+            var response = await client.PrivatedExecuteAsync(url, message, false, false, forcePost, cancellationToken);
             var responseAsString = await response.Content.ReadAsStringAsync();
             return JsonSerializer.Deserialize<TResponse>(responseAsString)!;
         }

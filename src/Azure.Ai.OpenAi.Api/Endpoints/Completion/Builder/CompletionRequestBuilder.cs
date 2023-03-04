@@ -10,7 +10,7 @@ namespace Azure.Ai.OpenAi.Completion
 {
     public sealed class CompletionRequestBuilder : RequestBuilder<CompletionRequest>
     {
-        public override List<Model> AvailableModels => Model.All;
+        public override List<Model> AvailableModels => Model.AllText;
 
         internal CompletionRequestBuilder(HttpClient client, OpenAiConfiguration configuration, string[] prompts)
             : base(client, configuration, () =>

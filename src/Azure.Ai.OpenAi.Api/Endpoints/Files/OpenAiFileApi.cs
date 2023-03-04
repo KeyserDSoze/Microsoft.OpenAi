@@ -41,7 +41,7 @@ namespace Azure.Ai.OpenAi.File
             => _client.ExecuteAsync<FileResult>($"{_configuration.FileUri}/{fileId}", null, cancellationToken);
         public async Task<string> RetrieveFileContentAsStringAsync(string fileId, CancellationToken cancellationToken = default)
         {
-            var response = await _client.PrivatedExecuteAsync($"{_configuration.FileUri}/{fileId}/content", null, false, false, cancellationToken);
+            var response = await _client.PrivatedExecuteAsync($"{_configuration.FileUri}/{fileId}/content", null, false, false, false, cancellationToken);
             return await response.Content.ReadAsStringAsync();
         }
         private sealed class FilesData : ApiBaseResponse

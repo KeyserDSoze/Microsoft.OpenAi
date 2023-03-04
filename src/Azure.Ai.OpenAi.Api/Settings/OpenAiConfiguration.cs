@@ -10,6 +10,7 @@ namespace Azure.Ai.OpenAi
         public string EditUri { get; }
         public string EmbeddingUri { get; }
         public string FileUri { get; }
+        public string FineTuneUri { get; }
         public string ModelUri { get; }
         public string ModerationUri { get; }
         public string ImageUri { get; }
@@ -33,6 +34,7 @@ namespace Azure.Ai.OpenAi
             EditUri = string.Format(Uri, "edits");
             EmbeddingUri = string.Format(Uri, "embeddings");
             FileUri = string.Format(Uri, "files");
+            FineTuneUri = string.Format(Uri, "fine-tunes");
             ModelUri = string.Format(Uri, "models");
             ModerationUri = string.Format(Uri, "moderations");
             ImageUri = string.Format(Uri, "images");

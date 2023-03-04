@@ -109,6 +109,13 @@ namespace Azure.Ai.OpenAi.Models
             Gpt35Turbo,
             Gpt35Turbo0301
         };
+        public static List<Model> AllText { get; } = new List<Model>()
+        {
+             CurieText,
+             DavinciText,
+             AdaText,
+             BabbageText,
+        };
         internal static Model FromModelType(ModelType type)
         {
             switch (type)
