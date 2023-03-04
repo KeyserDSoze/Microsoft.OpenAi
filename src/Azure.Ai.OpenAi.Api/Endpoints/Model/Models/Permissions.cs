@@ -12,12 +12,12 @@ namespace Azure.Ai.OpenAi.Models
         /// Permission Id (not to be confused with ModelId)
         /// </summary>
         [JsonPropertyName("id")]
-        public string Id { get; set; }
+        public string? Id { get; set; }
         /// <summary>
         /// Object type, should always be 'model_permission'
         /// </summary>
         [JsonPropertyName("object")]
-        public string Object { get; set; }
+        public string? Object { get; set; }
         /// The time when the permission was created
         [JsonIgnore]
         public DateTime Created => DateTimeOffset.FromUnixTimeSeconds(CreatedUnixTime).DateTime;
@@ -61,12 +61,12 @@ namespace Azure.Ai.OpenAi.Models
         /// Is the model only allowed for a particular organization? May not be implemented yet.
         /// </summary>
         [JsonPropertyName("organization")]
-        public string Organization { get; set; }
+        public string? Organization { get; set; }
         /// <summary>
         /// Is the model part of a group? Seems not implemented yet. Always null.
         /// </summary>
         [JsonPropertyName("group")]
-        public string Group { get; set; }
+        public string? Group { get; set; }
         [JsonPropertyName("is_blocking")]
         public bool IsBlocking { get; set; }
     }

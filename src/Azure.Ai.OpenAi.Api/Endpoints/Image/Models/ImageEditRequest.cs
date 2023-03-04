@@ -6,16 +6,15 @@ namespace Azure.Ai.OpenAi.Image
 {
     public sealed class ImageEditRequest : IOpenAiRequest, IDisposable
     {
-        public string Prompt { get; set; }
-        public Stream Image { get; set; }
-        public string ImageName { get; set; }
+        public string? Prompt { get; set; }
+        public Stream? Image { get; set; }
+        public string? ImageName { get; set; }
         public Stream? Mask { get; set; }
-        public string MaskName { get; set; }
-        public int NumberOfResults { get; set; }
-        public string Size { get; set; }
-        public string User { get; set; }
-        public string ResponseFormat { get; set; }
-        [JsonIgnore]
+        public string? MaskName { get; set; }
+        public int? NumberOfResults { get; set; }
+        public string? Size { get; set; }
+        public string? User { get; set; }
+        public string? ResponseFormat { get; set; }
         public string? ModelId { get; set; }
         private void Dispose(bool disposing)
         {

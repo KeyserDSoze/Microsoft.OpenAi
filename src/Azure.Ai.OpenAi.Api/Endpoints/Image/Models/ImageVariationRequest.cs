@@ -6,12 +6,12 @@ namespace Azure.Ai.OpenAi.Image
 {
     public sealed class ImageVariationRequest : IOpenAiRequest, IDisposable
     {
-        public Stream Image { get; set; }
-        public string ImageName { get; set; }
-        public int NumberOfResults { get; set; }
-        public string Size { get; set; }
-        public string User { get; set; }
-        public string ResponseFormat { get; set; }
+        public Stream? Image { get; set; }
+        public string? ImageName { get; set; }
+        public int? NumberOfResults { get; set; }
+        public string? Size { get; set; }
+        public string? User { get; set; }
+        public string? ResponseFormat { get; set; }
         [JsonIgnore]
         public string? ModelId { get; set; }
         private void Dispose(bool disposing)

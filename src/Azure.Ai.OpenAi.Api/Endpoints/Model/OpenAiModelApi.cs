@@ -26,8 +26,6 @@ namespace Azure.Ai.OpenAi.Models
         {
             [JsonPropertyName("data")]
             public List<Model>? Data { get; set; }
-            [JsonPropertyName("object")]
-            public string? Object { get; set; }
         }
     }
 }

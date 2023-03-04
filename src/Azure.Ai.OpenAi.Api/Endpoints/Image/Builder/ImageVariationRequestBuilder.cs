@@ -6,7 +6,6 @@ using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Azure.Ai.OpenAi.Models;
 
 namespace Azure.Ai.OpenAi.Image
 {
@@ -19,7 +18,7 @@ namespace Azure.Ai.OpenAi.Image
                 var request = new ImageVariationRequest()
                 {
                     NumberOfResults = 1,
-                    Size = "1024x1024",
+                    Size = ImageSize.Large.AsString(),
                 };
                 var memoryStream = new MemoryStream();
                 image.CopyTo(memoryStream);
@@ -39,18 +38,20 @@ namespace Azure.Ai.OpenAi.Image
         {
             _request.ResponseFormat = ImageCreateRequestBuilder.ResponseFormatUrl;
             using var content = new MultipartFormDataContent();
-            using var imageData = new MemoryStream();
-            await _request.Image.CopyToAsync(imageData, cancellationToken);
-            imageData.Position = 0;
-            content.Add(new ByteArrayContent(imageData.ToArray()), "image", _request.ImageName);
-
-            content.Add(new StringContent(_request.NumberOfResults.ToString()), "n");
-            content.Add(new StringContent(_request.Size), "size");
+            if (_request.Image != null)
+            {
+                using var imageData = new MemoryStream();
+                await _request.Image.CopyToAsync(imageData, cancellationToken);
+                imageData.Position = 0;
+                content.Add(new ByteArrayContent(imageData.ToArray()), "image", _request.ImageName);
+            }
+            if (_request.NumberOfResults != null)
+                content.Add(new StringContent(_request.NumberOfResults.ToString()), "n");
+            if (_request.Size != null)
+                content.Add(new StringContent(_request.Size), "size");
 
             if (!string.IsNullOrWhiteSpace(_request.User))
-            {
                 content.Add(new StringContent(_request.User), "user");
-            }
             _request.Dispose();
 
             var response = await _client.ExecuteAsync<ImageResult>($"{_configuration.ImageUri}/variations", content, cancellationToken);
@@ -66,19 +67,22 @@ namespace Azure.Ai.OpenAi.Image
         {
             var uri = $"{_configuration.ImageUri}/generations";
             var responses = await _client.ExecuteAsync<ImageResult>(uri, _request, cancellationToken);
-            using var client = new HttpClient();
-            foreach (var image in responses.Data)
+            if (responses.Data != null)
             {
-                cancellationToken.ThrowIfCancellationRequested();
-                var response = await client.GetAsync(image.Url);
-                response.EnsureSuccessStatusCode();
-                if (response != null && response.StatusCode == HttpStatusCode.OK)
+                using var client = new HttpClient();
+                foreach (var image in responses.Data)
                 {
-                    using var stream = await response.Content.ReadAsStreamAsync();
-                    var memoryStream = new MemoryStream();
-                    await stream.CopyToAsync(memoryStream);
-                    memoryStream.Position = 0;
-                    yield return memoryStream;
+                    cancellationToken.ThrowIfCancellationRequested();
+                    var response = await client.GetAsync(image.Url);
+                    response.EnsureSuccessStatusCode();
+                    if (response != null && response.StatusCode == HttpStatusCode.OK)
+                    {
+                        using var stream = await response.Content.ReadAsStreamAsync();
+                        var memoryStream = new MemoryStream();
+                        await stream.CopyToAsync(memoryStream);
+                        memoryStream.Position = 0;
+                        yield return memoryStream;
+                    }
                 }
             }
         }

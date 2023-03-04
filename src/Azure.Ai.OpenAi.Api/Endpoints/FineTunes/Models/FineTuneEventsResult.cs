@@ -3,12 +3,10 @@ using System.Text.Json.Serialization;
 
 namespace Azure.Ai.OpenAi.FineTune
 {
-    public sealed class FineTuneEventsResult
+    public sealed class FineTuneEventsResult : ApiBaseResponse
     {
-        [JsonPropertyName("object")]
-        public string Object { get; set; }
         [JsonPropertyName("data")]
-        public List<FineTuneEvent> Results { get; set; }
+        public List<FineTuneEvent>? Data { get; set; }
     }
 
 }

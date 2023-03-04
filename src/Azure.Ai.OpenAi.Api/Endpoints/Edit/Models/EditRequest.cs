@@ -5,11 +5,11 @@ namespace Azure.Ai.OpenAi.Edit
     public sealed class EditRequest : IOpenAiRequest
     {
         [JsonPropertyName("model")]
-        public string ModelId { get; set; }
+        public string? ModelId { get; set; }
         [JsonPropertyName("input")]
-        public string Input { get; set; }
+        public string? Input { get; set; }
         [JsonPropertyName("instruction")]
-        public string Instruction { get; set; }
+        public string? Instruction { get; set; }
         [JsonPropertyName("temperature")]
         public double? Temperature { get; set; }
         [JsonPropertyName("top_p")]

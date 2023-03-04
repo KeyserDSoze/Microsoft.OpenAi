@@ -20,7 +20,7 @@ namespace Azure.Ai.OpenAi.File
         public async Task<List<FileResult>> AllAsync(CancellationToken cancellationToken = default)
         {
             var response = await _client.ExecuteAsync<FilesData>(_configuration.FileUri, null, cancellationToken);
-            return response.Data;
+            return response.Data ?? new List<FileResult>();
         }
         private const string Purpose = "purpose";
         private const string FileContent = "file";
@@ -47,7 +47,7 @@ namespace Azure.Ai.OpenAi.File
         private sealed class FilesData : ApiBaseResponse
         {
             [JsonPropertyName("data")]
-            public List<FileResult> Data { get; set; }
+            public List<FileResult>? Data { get; set; }
         }
     }
 }

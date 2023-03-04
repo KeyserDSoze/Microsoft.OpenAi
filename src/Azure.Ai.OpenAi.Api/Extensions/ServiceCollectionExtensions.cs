@@ -2,9 +2,13 @@
 using System.Net.Http;
 using System.Net.Http.Headers;
 using Azure.Ai.OpenAi;
+using Azure.Ai.OpenAi.Audio;
+using Azure.Ai.OpenAi.Chat;
 using Azure.Ai.OpenAi.Completion;
+using Azure.Ai.OpenAi.Edit;
 using Azure.Ai.OpenAi.Embedding;
 using Azure.Ai.OpenAi.File;
+using Azure.Ai.OpenAi.FineTune;
 using Azure.Ai.OpenAi.Image;
 using Azure.Ai.OpenAi.Models;
 using Azure.Ai.OpenAi.Moderation;
@@ -43,9 +47,13 @@ namespace Microsoft.Extensions.DependencyInjection
                 .AddScoped<IOpenAiApi, OpenAiApi>()
                 .AddScoped<IOpenAiEmbeddingApi, OpenAiEmbeddingApi>()
                 .AddScoped<IOpenAiFileApi, OpenAiFileApi>()
+                .AddScoped<IOpenAiAudioApi, OpenAiAudioApi>()
                 .AddScoped<IOpenAiModelApi, OpenAiModelApi>()
                 .AddScoped<IOpenAiModerationApi, OpenAiModerationApi>()
                 .AddScoped<IOpenAiImageApi, OpenAiImageApi>()
+                .AddScoped<IOpenAiFineTuneApi, OpenAiFineTuneApi>()
+                .AddScoped<IOpenAiEditApi, OpenAiEditApi>()
+                .AddScoped<IOpenAiChatApi, OpenAiChatApi>()
                 .AddScoped<IOpenAiCompletionApi, OpenAiCompletionApi>();
             return services;
         }

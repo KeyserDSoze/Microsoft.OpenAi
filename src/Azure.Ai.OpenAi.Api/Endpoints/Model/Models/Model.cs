@@ -13,7 +13,7 @@ namespace Azure.Ai.OpenAi.Models
         /// The id/name of the model
         /// </summary>
         [JsonPropertyName("id")]
-        public string Id { get; set; }
+        public string? Id { get; set; }
         /// <summary>
         /// The owner of this model.  Generally "openai" is a generic OpenAI model, or the organization if a custom or finetuned model.
         /// </summary>

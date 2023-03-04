@@ -7,9 +7,9 @@ namespace Azure.Ai.OpenAi.FineTune
         [JsonPropertyName("model")]
         public string? ModelId { get; set; }
         [JsonPropertyName("training_file")]
-        public string TrainingFile { get; set; }
+        public string? TrainingFile { get; set; }
         [JsonPropertyName("validation_file")]
-        public string ValidationFile { get; set; }
+        public string? ValidationFile { get; set; }
         [JsonPropertyName("n_epochs")]
         public int NEpochs { get; set; }
         [JsonPropertyName("batch_size")]
@@ -23,10 +23,10 @@ namespace Azure.Ai.OpenAi.FineTune
         [JsonPropertyName("classification_n_classes")]
         public int ClassificationNClasses { get; set; }
         [JsonPropertyName("classification_positive_class")]
-        public string ClassificationPositiveClass { get; set; }
+        public string? ClassificationPositiveClass { get; set; }
         [JsonPropertyName("classification_betas")]
-        public string[] ClassificationBetas { get; set; }
+        public string[]? ClassificationBetas { get; set; }
         [JsonPropertyName("suffix")]
-        public string Suffix { get; set; }
+        public string? Suffix { get; set; }
     }
 }

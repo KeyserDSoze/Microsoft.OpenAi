@@ -6,10 +6,8 @@ namespace Azure.Ai.OpenAi.Moderation
     public sealed class ModerationsResponse : ApiBaseResponse
     {
         [JsonPropertyName("id")]
-        public string Id { get; set; }
-        [JsonPropertyName("model")]
-        public string Model { get; set; }
+        public string? Id { get; set; }
         [JsonPropertyName("results")]
-        public List<ModerationResult> Results { get; set; }
+        public List<ModerationResult>? Results { get; set; }
     }
 }

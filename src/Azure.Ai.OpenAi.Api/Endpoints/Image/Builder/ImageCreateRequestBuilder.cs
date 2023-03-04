@@ -6,7 +6,6 @@ using System.Net.Http;
 using System.Runtime.CompilerServices;
 using System.Threading;
 using System.Threading.Tasks;
-using Azure.Ai.OpenAi.Models;
 
 namespace Azure.Ai.OpenAi.Image
 {
@@ -48,19 +47,22 @@ namespace Azure.Ai.OpenAi.Image
         public async IAsyncEnumerable<Stream> DownloadAsync([EnumeratorCancellation] CancellationToken cancellationToken = default)
         {
             var responses = await GetUrlAsync(cancellationToken);
-            using var client = new HttpClient();
-            foreach (var image in responses.Data)
+            if (responses.Data != null)
             {
-                cancellationToken.ThrowIfCancellationRequested();
-                var response = await client.GetAsync(image.Url);
-                response.EnsureSuccessStatusCode();
-                if (response != null && response.StatusCode == HttpStatusCode.OK)
+                using var client = new HttpClient();
+                foreach (var image in responses.Data)
                 {
-                    using var stream = await response.Content.ReadAsStreamAsync();
-                    var memoryStream = new MemoryStream();
-                    await stream.CopyToAsync(memoryStream);
-                    memoryStream.Position = 0;
-                    yield return memoryStream;
+                    cancellationToken.ThrowIfCancellationRequested();
+                    var response = await client.GetAsync(image.Url);
+                    response.EnsureSuccessStatusCode();
+                    if (response != null && response.StatusCode == HttpStatusCode.OK)
+                    {
+                        using var stream = await response.Content.ReadAsStreamAsync();
+                        var memoryStream = new MemoryStream();
+                        await stream.CopyToAsync(memoryStream);
+                        memoryStream.Position = 0;
+                        yield return memoryStream;
+                    }
                 }
             }
         }

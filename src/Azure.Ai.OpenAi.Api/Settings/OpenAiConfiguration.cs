@@ -14,6 +14,8 @@ namespace Azure.Ai.OpenAi
         public string ModelUri { get; }
         public string ModerationUri { get; }
         public string ImageUri { get; }
+        public string AudioTranscriptionUri { get; }
+        public string AudioTranslationUri { get; }
         internal OpenAiConfiguration(OpenAiSettings settings)
         {
             if (settings.Azure.ResourceName != null)
@@ -38,6 +40,8 @@ namespace Azure.Ai.OpenAi
             ModelUri = string.Format(Uri, "models");
             ModerationUri = string.Format(Uri, "moderations");
             ImageUri = string.Format(Uri, "images");
+            AudioTranscriptionUri = string.Format(Uri, "audio/transcriptions");
+            AudioTranslationUri = string.Format(Uri, "audio/translations");
         }
     }
 }

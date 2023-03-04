@@ -5,6 +5,6 @@ namespace Azure.Ai.OpenAi.Image
     public sealed class ImageData
     {
         [JsonPropertyName("url")]
-        public string Url { get; set; }
+        public string? Url { get; set; }
     }
 }

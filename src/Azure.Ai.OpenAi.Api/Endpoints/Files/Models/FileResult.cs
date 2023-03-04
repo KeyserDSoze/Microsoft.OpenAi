@@ -11,17 +11,17 @@ namespace Azure.Ai.OpenAi.File
         /// Unique id for this file, so that it can be referenced in other operations
         /// </summary>
         [JsonPropertyName("id")]
-        public string Id { get; set; }
+        public string? Id { get; set; }
         /// <summary>
         /// The name of the file
         /// </summary>
         [JsonPropertyName("filename")]
-        public string Name { get; set; }
+        public string? Name { get; set; }
         /// <summary>
         /// What is the purpose of this file, fine-tune, search, etc
         /// </summary>
         [JsonPropertyName("purpose")]
-        public string Purpose { get; set; }
+        public string? Purpose { get; set; }
         /// <summary>
         /// The size of the file in bytes
         /// </summary>
@@ -41,11 +41,11 @@ namespace Azure.Ai.OpenAi.File
         /// The status of the File (ie when an upload operation was done: "uploaded")
         /// </summary>
         [JsonPropertyName("status")]
-        public string Status { get; set; }
+        public string? Status { get; set; }
         /// <summary>
         /// The status details, it could be null
         /// </summary>
         [JsonPropertyName("status_details")]
-        public string StatusDetails { get; set; }
+        public string? StatusDetails { get; set; }
     }
 }
