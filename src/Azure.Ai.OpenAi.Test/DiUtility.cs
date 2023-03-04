@@ -21,6 +21,22 @@ namespace Azure.OpenAi.Test
                .AddEnvironmentVariables()
                .Build();
             services.AddSingleton(configuration);
+            var apiKey = configuration["OpenAi:ApiKey"];
+            services.AddOpenAi(settings =>
+            {
+                settings.ApiKey = apiKey;
+            });
+            return services;
+        }
+        public static IServiceCollection CreateDependencyInjectionWithConfigurationForAzure(out IConfiguration configuration)
+        {
+            var services = new ServiceCollection();
+            configuration = new ConfigurationBuilder()
+               .AddJsonFile("appsettings.test.json")
+               .AddUserSecrets<ForUserSecrets>()
+               .AddEnvironmentVariables()
+               .Build();
+            services.AddSingleton(configuration);
             var apiKey = configuration["Azure:ApiKey"];
             var resourceName = configuration["Azure:ResourceName"];
             var deploymentId = configuration["Azure:DeploymentId"];
@@ -39,6 +55,12 @@ namespace Azure.OpenAi.Test
         public static IOpenAiApi GetOpenAi()
         {
             var services = CreateDependencyInjectionWithConfiguration(out _);
+            _ = services.Finalize(out var serviceProvider);
+            return serviceProvider.CreateScope().ServiceProvider.GetService<IOpenAiApi>();
+        }
+        public static IOpenAiApi GetOpenAiForAzure()
+        {
+            var services = CreateDependencyInjectionWithConfigurationForAzure(out _);
             _ = services.Finalize(out var serviceProvider);
             return serviceProvider.CreateScope().ServiceProvider.GetService<IOpenAiApi>();
         }
