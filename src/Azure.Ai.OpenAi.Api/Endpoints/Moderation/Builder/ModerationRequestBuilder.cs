@@ -23,7 +23,7 @@ namespace Azure.Ai.OpenAi.Moderation
         /// </summary>
         /// <returns>Builder</returns>
         public ValueTask<ModerationsResponse> ExecuteAsync(CancellationToken cancellationToken = default)
-            => _client.ExecuteAsync<ModerationsResponse>(_configuration.GetUri(OpenAi.Moderation, _request.ModelId!), _request, cancellationToken);
+            => _client.PostAsync<ModerationsResponse>(_configuration.GetUri(OpenAi.Moderation, _request.ModelId!), _request, cancellationToken);
         /// <summary>
         /// ID of the model to use.
         /// </summary>

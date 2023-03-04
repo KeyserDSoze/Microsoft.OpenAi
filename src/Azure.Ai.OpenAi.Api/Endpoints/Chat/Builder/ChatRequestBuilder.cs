@@ -28,7 +28,7 @@ namespace Azure.Ai.OpenAi.Chat
         public ValueTask<ChatResult> ExecuteAsync(CancellationToken cancellationToken = default)
         {
             _request.Stream = false;
-            return _client.ExecuteAsync<ChatResult>(_configuration.GetUri(OpenAi.Chat, _request.ModelId!), _request, cancellationToken);
+            return _client.PostAsync<ChatResult>(_configuration.GetUri(OpenAi.Chat, _request.ModelId!), _request, cancellationToken);
         }
         /// <summary>
         /// Specifies where the results should stream and be returned at one time.
@@ -37,7 +37,7 @@ namespace Azure.Ai.OpenAi.Chat
         public IAsyncEnumerable<ChatResult> ExecuteAsStreamAsync(CancellationToken cancellationToken = default)
         {
             _request.Stream = true;
-            return _client.ExecuteStreamAsync<ChatResult>(_configuration.GetUri(OpenAi.Chat, _request.ModelId!), _request, cancellationToken);
+            return _client.PostStreamAsync<ChatResult>(_configuration.GetUri(OpenAi.Chat, _request.ModelId!), _request, cancellationToken);
         }
         /// <summary>
         /// Add a message to the request

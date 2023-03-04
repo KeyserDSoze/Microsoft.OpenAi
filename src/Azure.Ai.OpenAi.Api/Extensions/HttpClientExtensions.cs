@@ -14,9 +14,14 @@ namespace Azure.Ai.OpenAi
 {
     public static class HttpClientExtensions
     {
-        internal static async Task<HttpResponseMessage> PrivatedExecuteAsync(this HttpClient client, string url, object? message, bool isStreaming, bool isDelete, bool forcePost, CancellationToken cancellationToken)
+        internal static async Task<HttpResponseMessage> PrivatedExecuteAsync(this HttpClient client,
+            string url,
+            HttpMethod method,
+            object? message,
+            bool isStreaming,
+            CancellationToken cancellationToken)
         {
-            var request = new HttpRequestMessage(isDelete ? HttpMethod.Delete : (message != null || forcePost ? HttpMethod.Post : HttpMethod.Get), url);
+            var request = new HttpRequestMessage(method, url);
             if (message != null)
             {
                 if (message is HttpContent httpContent)
@@ -40,26 +45,32 @@ namespace Azure.Ai.OpenAi
                 throw new HttpRequestException(await response.Content.ReadAsStringAsync());
             }
         }
-        internal static async ValueTask<TResponse> DeleteAsync<TResponse>(this HttpClient client, string url, object? message, CancellationToken cancellationToken)
+        internal static async ValueTask<TResponse> DeleteAsync<TResponse>(this HttpClient client, string url, CancellationToken cancellationToken)
         {
-            var response = await client.PrivatedExecuteAsync(url, message, false, true, false, cancellationToken);
+            var response = await client.PrivatedExecuteAsync(url, HttpMethod.Delete, null, false, cancellationToken);
             var responseAsString = await response.Content.ReadAsStringAsync();
             return JsonSerializer.Deserialize<TResponse>(responseAsString)!;
         }
-        internal static async ValueTask<TResponse> ExecuteAsync<TResponse>(this HttpClient client, string url, object? message, CancellationToken cancellationToken, bool forcePost = false)
+        internal static async ValueTask<TResponse> GetAsync<TResponse>(this HttpClient client, string url, CancellationToken cancellationToken)
         {
-            var response = await client.PrivatedExecuteAsync(url, message, false, false, forcePost, cancellationToken);
+            var response = await client.PrivatedExecuteAsync(url, HttpMethod.Get, null, false, cancellationToken);
+            var responseAsString = await response.Content.ReadAsStringAsync();
+            return JsonSerializer.Deserialize<TResponse>(responseAsString)!;
+        }
+        internal static async ValueTask<TResponse> PostAsync<TResponse>(this HttpClient client, string url, object? message, CancellationToken cancellationToken)
+        {
+            var response = await client.PrivatedExecuteAsync(url, HttpMethod.Post, message, false, cancellationToken);
             var responseAsString = await response.Content.ReadAsStringAsync();
             return JsonSerializer.Deserialize<TResponse>(responseAsString)!;
         }
         private const string StartingWith = "data: ";
         private const string Done = "[DONE]";
-        internal static async IAsyncEnumerable<TResponse> ExecuteStreamAsync<TResponse>(this HttpClient client,
+        internal static async IAsyncEnumerable<TResponse> PostStreamAsync<TResponse>(this HttpClient client,
             string url,
             object? message,
             [EnumeratorCancellation] CancellationToken cancellationToken)
         {
-            var response = await client.PrivatedExecuteAsync(url, message, true, false, false, cancellationToken);
+            var response = await client.PrivatedExecuteAsync(url, HttpMethod.Post, message, true, cancellationToken);
             using var stream = await response.Content.ReadAsStreamAsync();
             using var reader = new StreamReader(stream);
             string line;

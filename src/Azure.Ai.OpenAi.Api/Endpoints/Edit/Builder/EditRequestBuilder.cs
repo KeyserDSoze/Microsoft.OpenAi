@@ -25,7 +25,7 @@ namespace Azure.Ai.OpenAi.Edit
         /// </summary>
         /// <returns>Builder</returns>
         public ValueTask<EditResult> ExecuteAsync(CancellationToken cancellationToken = default)
-            => _client.ExecuteAsync<EditResult>(_configuration.GetUri(OpenAi.Edit, _request.ModelId!), _request, cancellationToken);
+            => _client.PostAsync<EditResult>(_configuration.GetUri(OpenAi.Edit, _request.ModelId!), _request, cancellationToken);
         /// <summary>
         /// ID of the model to use.
         /// </summary>

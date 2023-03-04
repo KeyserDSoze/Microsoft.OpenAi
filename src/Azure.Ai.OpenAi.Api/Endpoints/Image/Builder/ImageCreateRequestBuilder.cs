@@ -36,7 +36,7 @@ namespace Azure.Ai.OpenAi.Image
         {
             _request.ResponseFormat = ResponseFormatUrl;
             var uri = $"{_configuration.GetUri(OpenAi.Image, _request.ModelId!)}/generations";
-            return _client.ExecuteAsync<ImageResult>(uri, _request, cancellationToken);
+            return _client.PostAsync<ImageResult>(uri, _request, cancellationToken);
         }
         /// <summary>
         /// Creates an image given a prompt.

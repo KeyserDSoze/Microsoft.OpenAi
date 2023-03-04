@@ -18,7 +18,6 @@ namespace Azure.OpenAi.Test
             configuration = new ConfigurationBuilder()
                .AddJsonFile("appsettings.test.json")
                .AddUserSecrets<ForUserSecrets>()
-               .AddEnvironmentVariables()
                .Build();
             services.AddSingleton(configuration);
             var apiKey = configuration["OpenAi:ApiKey"];
@@ -34,7 +33,6 @@ namespace Azure.OpenAi.Test
             configuration = new ConfigurationBuilder()
                .AddJsonFile("appsettings.test.json")
                .AddUserSecrets<ForUserSecrets>()
-               .AddEnvironmentVariables()
                .Build();
             services.AddSingleton(configuration);
             var apiKey = configuration["Azure:ApiKey"];
