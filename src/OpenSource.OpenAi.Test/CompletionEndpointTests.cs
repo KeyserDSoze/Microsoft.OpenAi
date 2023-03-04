@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using OpenSource.OpenAi;
 using OpenSource.OpenAi.Completion;
 using OpenSource.OpenAi.Models;
 using Xunit;
@@ -10,13 +11,17 @@ namespace Azure.OpenAi.Test
 {
     public class CompletionEndpointTests
     {
+        private readonly IOpenAiApi _openAiApi;
+        public CompletionEndpointTests(IOpenAiApi openAiApi)
+        {
+            _openAiApi = openAiApi;
+        }
         [Fact]
         public async ValueTask GetBasicCompletionAsync()
         {
-            var api = DiUtility.GetOpenAi();
-            Assert.NotNull(api.Completion);
+            Assert.NotNull(_openAiApi.Completion);
 
-            var results = await api.Completion
+            var results = await _openAiApi.Completion
                 .Request("One Two Three Four Five Six Seven Eight Nine One Two Three Four Five Six Seven Eight")
                 .WithModel(TextModelType.CurieText)
                 .WithTemperature(0.1)
@@ -31,34 +36,32 @@ namespace Azure.OpenAi.Test
             Assert.True(results.Created.Value < DateTime.UtcNow.AddSeconds(30));
             Assert.NotNull(results.Completions);
             Assert.True(results.Completions.Count != 0);
-            Assert.True(results.Completions.Any(c => c.Text.Trim().ToLower().StartsWith("nine")));
+            Assert.Contains(results.Completions, c => c.Text.Trim().ToLower().StartsWith("nine"));
         }
 
 
         [Fact]
         public async ValueTask GetSimpleCompletionAsync()
         {
-            var api = DiUtility.GetOpenAi();
-            Assert.NotNull(api.Completion);
+            Assert.NotNull(_openAiApi.Completion);
 
-            var results = await api.Completion
+            var results = await _openAiApi.Completion
                 .Request("One Two Three Four Five Six Seven Eight Nine One Two Three Four Five Six Seven Eight")
                 .WithTemperature(0.1)
                 .SetMaxTokens(5)
                 .ExecuteAsync();
             Assert.NotNull(results);
             Assert.True(results.Completions.Count > 0);
-            Assert.True(results.Completions.Any(c => c.Text.Trim().ToLower().StartsWith("nine")));
+            Assert.Contains(results.Completions, c => c.Text.Trim().ToLower().StartsWith("nine"));
         }
 
 
         [Fact]
         public async ValueTask CompletionUsageDataWorksAsync()
         {
-            var api = DiUtility.GetOpenAi();
-            Assert.NotNull(api.Completion);
+            Assert.NotNull(_openAiApi.Completion);
 
-            var results = await api.Completion
+            var results = await _openAiApi.Completion
                .Request("One Two Three Four Five Six Seven Eight Nine One Two Three Four Five Six Seven Eight")
                .WithModel(TextModelType.CurieText)
                .WithTemperature(0.1)
@@ -75,10 +78,9 @@ namespace Azure.OpenAi.Test
         [Fact]
         public async Task CreateCompletionAsync_MultiplePrompts_ShouldReturnResult()
         {
-            var api = DiUtility.GetOpenAi();
-            Assert.NotNull(api.Completion);
-            List<CompletionResult> results = new();
-            await foreach (var x in api.Completion
+            Assert.NotNull(_openAiApi.Completion);
+            var results = new List<CompletionResult>();
+            await foreach (var x in _openAiApi.Completion
                .Request("Today is Monday, tomorrow is", "10 11 12 13 14")
                .WithTemperature(0)
                .SetMaxTokens(3)
@@ -88,8 +90,8 @@ namespace Azure.OpenAi.Test
             }
 
             Assert.NotEmpty(results);
-            Assert.True(results.First().Completions.Any(c => c.Text.Trim().ToLower().StartsWith("tuesday")));
-            Assert.True(results.Last().Completions.Any(c => c.Text.Trim().ToLower().StartsWith("15")));
+            Assert.Contains(results.First().Completions, c => c.Text.Trim().ToLower().StartsWith("tuesday"));
+            Assert.Contains(results.Last().Completions, c => c.Text.Trim().ToLower().StartsWith("15"));
         }
 
 

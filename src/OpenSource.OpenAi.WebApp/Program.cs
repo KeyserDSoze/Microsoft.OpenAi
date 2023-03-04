@@ -11,6 +11,8 @@ builder.Services.AddOpenAi(settings =>
 {
     settings.ApiKey = apiKey;
 });
+
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.

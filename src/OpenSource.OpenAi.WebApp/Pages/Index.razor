@@ -19,13 +19,16 @@ Welcome to your new app.
 }
 
 
+
+
 @code {
     [Inject]
     public IOpenAiApi Api { get; set; }
+    
     private List<Model> _models;
     protected override async Task OnParametersSetAsync()
     {
-        _models = await Api.Model.ListAsync();
-        await base.OnParametersSetAsync();
+        //_models = await Api.Model.ListAsync();
+        //await base.OnParametersSetAsync();
     }
 }

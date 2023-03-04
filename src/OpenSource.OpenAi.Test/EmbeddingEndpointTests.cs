@@ -1,20 +1,24 @@
 ﻿using System;
 using System.Linq;
 using System.Threading.Tasks;
+using OpenSource.OpenAi;
 using Xunit;
 
 namespace Azure.OpenAi.Test
 {
     public class EmbeddingEndpointTests
     {
+        private readonly IOpenAiApi _openAiApi;
+        public EmbeddingEndpointTests(IOpenAiApi openAiApi)
+        {
+            _openAiApi = openAiApi;
+        }
         [Fact]
         public async ValueTask GetBasicEmbeddingAsync()
         {
-            var api = DiUtility.GetOpenAi();
+            Assert.NotNull(_openAiApi.Embedding);
 
-            Assert.NotNull(api.Embedding);
-
-            var results = await api.Embedding.Request("A test text for embedding").ExecuteAsync();
+            var results = await _openAiApi.Embedding.Request("A test text for embedding").ExecuteAsync();
             Assert.NotNull(results);
             if (results.CreatedUnixTime.HasValue)
             {
@@ -35,11 +39,9 @@ namespace Azure.OpenAi.Test
         [Fact]
         public async ValueTask ReturnedUsageAsync()
         {
-            var api = DiUtility.GetOpenAi();
+            Assert.NotNull(_openAiApi.Embedding);
 
-            Assert.NotNull(api.Embedding);
-
-            var results = await api.Embedding.Request("A test text for embedding").ExecuteAsync();
+            var results = await _openAiApi.Embedding.Request("A test text for embedding").ExecuteAsync();
             Assert.NotNull(results);
 
             Assert.NotNull(results.Usage);
@@ -50,11 +52,9 @@ namespace Azure.OpenAi.Test
         [Fact]
         public async ValueTask GetSimpleEmbeddingAsync()
         {
-            var api = DiUtility.GetOpenAi();
+            Assert.NotNull(_openAiApi.Embedding);
 
-            Assert.NotNull(api.Embedding);
-
-            var results = await api.Embedding.Request("A test text for embedding").ExecuteAsync();
+            var results = await _openAiApi.Embedding.Request("A test text for embedding").ExecuteAsync();
             Assert.NotNull(results);
             Assert.True(results.Data.Count == 1536);
         }

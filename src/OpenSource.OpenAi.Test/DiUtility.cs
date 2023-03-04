@@ -1,67 +1,31 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using OpenSource.OpenAi;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
+using OpenSource.OpenAi;
 using OpenSource.OpenAi.Models;
 
 namespace Azure.OpenAi.Test
 {
-    internal static class DiUtility
+    public class Startup
     {
         private sealed class ForUserSecrets { }
-        public static IServiceCollection CreateDependencyInjectionWithConfiguration(out IConfiguration configuration)
+
+        public void ConfigureHost(IHostBuilder hostBuilder) =>
+        hostBuilder
+            .ConfigureHostConfiguration(builder => { })
+            .ConfigureAppConfiguration((context, builder) =>
+            {
+                builder.AddJsonFile("appsettings.test.json")
+               .AddUserSecrets<ForUserSecrets>();
+            });
+        public void ConfigureServices(IServiceCollection services, HostBuilderContext context)
         {
-            var services = new ServiceCollection();
-            configuration = new ConfigurationBuilder()
-               .AddJsonFile("appsettings.test.json")
-               .AddUserSecrets<ForUserSecrets>()
-               .Build();
-            services.AddSingleton(configuration);
-            var apiKey = configuration["OpenAi:ApiKey"];
+            var apiKey = context.Configuration["OpenAi:ApiKey"];
             services.AddOpenAi(settings =>
             {
                 settings.ApiKey = apiKey;
             });
-            return services;
-        }
-        public static IServiceCollection CreateDependencyInjectionWithConfigurationForAzure(out IConfiguration configuration)
-        {
-            var services = new ServiceCollection();
-            configuration = new ConfigurationBuilder()
-               .AddJsonFile("appsettings.test.json")
-               .AddUserSecrets<ForUserSecrets>()
-               .Build();
-            services.AddSingleton(configuration);
-            var apiKey = configuration["Azure:ApiKey"];
-            var resourceName = configuration["Azure:ResourceName"];
-            var deploymentId = configuration["Azure:DeploymentId"];
-            services.AddOpenAi(settings =>
-            {
-                settings.ApiKey = apiKey;
-                settings.Azure.ResourceName = resourceName;
-                settings
-                    .Azure
-                    .AddDeploymentModel(deploymentId, TextModelType.CurieText);
-            });
-            return services;
-        }
-        public static IServiceProvider Finalize(this IServiceCollection services, out IServiceProvider serviceProvider)
-            => serviceProvider = services.BuildServiceProvider().CreateScope().ServiceProvider;
-        public static IOpenAiApi GetOpenAi()
-        {
-            var services = CreateDependencyInjectionWithConfiguration(out _);
-            _ = services.Finalize(out var serviceProvider);
-            return serviceProvider.CreateScope().ServiceProvider.GetService<IOpenAiApi>();
-        }
-        public static IOpenAiApi GetOpenAiForAzure()
-        {
-            var services = CreateDependencyInjectionWithConfigurationForAzure(out _);
-            _ = services.Finalize(out var serviceProvider);
-            return serviceProvider.CreateScope().ServiceProvider.GetService<IOpenAiApi>();
         }
     }
 }

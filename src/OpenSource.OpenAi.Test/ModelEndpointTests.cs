@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using OpenSource.OpenAi;
 using OpenSource.OpenAi.Models;
 using Xunit;
 
@@ -7,14 +8,16 @@ namespace Azure.OpenAi.Test
 {
     public class ModelEndpointTests
     {
+        private readonly IOpenAiApi _openAiApi;
+        public ModelEndpointTests(IOpenAiApi openAiApi)
+        {
+            _openAiApi = openAiApi;
+        }
         [Fact]
         public async ValueTask GetAllModelsAsync()
         {
-            var api = DiUtility.GetOpenAi();
-
-            Assert.NotNull(api.Model);
-
-            var results = await api.Model.ListAsync();
+            Assert.NotNull(_openAiApi.Model);
+            var results = await _openAiApi.Model.ListAsync();
             Assert.NotNull(results);
             Assert.NotEmpty(results);
             Assert.Contains(results, c => c.Id.ToLower().StartsWith("text-davinci"));
@@ -23,11 +26,9 @@ namespace Azure.OpenAi.Test
         [Fact]
         public async ValueTask GetModelDetailsAsync()
         {
-            var api = DiUtility.GetOpenAi();
+            Assert.NotNull(_openAiApi.Model);
 
-            Assert.NotNull(api.Model);
-
-            var result = await api.Model.RetrieveAsync(TextModelType.DavinciText3.ToModel().Id);
+            var result = await _openAiApi.Model.RetrieveAsync(TextModelType.DavinciText3.ToModel().Id);
             Assert.NotNull(result);
 
             Assert.NotNull(result.CreatedUnixTime);
@@ -45,8 +46,7 @@ namespace Azure.OpenAi.Test
         [Fact]
         public async ValueTask GetEnginesAsync_ShouldReturnTheEngineList()
         {
-            var api = DiUtility.GetOpenAi();
-            var models = await api.Model.ListAsync();
+            var models = await _openAiApi.Model.ListAsync();
             Assert.True(models.Count > 5);
         }
 
@@ -57,8 +57,7 @@ namespace Azure.OpenAi.Test
         [InlineData("davinci")]
         public async ValueTask RetrieveEngineDetailsAsync_ShouldRetrieveEngineDetails(string modelId)
         {
-            var api = DiUtility.GetOpenAi();
-            var modelData = await api.Model.RetrieveAsync(modelId);
+            var modelData = await _openAiApi.Model.RetrieveAsync(modelId);
             Assert.Equal(modelId, modelData.Id);
             Assert.True(modelData.Created > new DateTime(2018, 1, 1));
             Assert.True(modelData.Created < DateTime.UtcNow.AddDays(1));

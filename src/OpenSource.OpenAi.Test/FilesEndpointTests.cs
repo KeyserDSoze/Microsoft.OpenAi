@@ -1,12 +1,18 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+using OpenSource.OpenAi;
 using Xunit;
 
 namespace Azure.OpenAi.Test
 {
     public class FilesEndpointTests
     {
+        private readonly IOpenAiApi _openAiApi;
+        public FilesEndpointTests(IOpenAiApi openAiApi)
+        {
+            _openAiApi = openAiApi;
+        }
         //[Fact]
         //[Order(1)]
         //public async Task UploadFile()

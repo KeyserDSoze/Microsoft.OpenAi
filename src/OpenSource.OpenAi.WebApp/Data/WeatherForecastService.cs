@@ -1,5 +1,9 @@
 ﻿namespace OpenSource.OpenAi.WebApp.Data
 {
+    public class Something
+    {
+        public string Name { get; set; }
+    }
     public class WeatherForecastService
     {
         private static readonly string[] s_summaries = new[]
