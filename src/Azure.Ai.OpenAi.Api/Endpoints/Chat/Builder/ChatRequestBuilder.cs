@@ -9,19 +9,14 @@ namespace Azure.Ai.OpenAi.Chat
 {
     public sealed class ChatRequestBuilder : RequestBuilder<ChatRequest>
     {
-        private static readonly List<Model> s_models = new List<Model>()
-        {
-            Model.Gpt35Turbo,
-            Model.Gpt35Turbo0301
-        };
-        public override List<Model> AvailableModels { get; } = s_models;
         internal ChatRequestBuilder(HttpClient client, OpenAiConfiguration configuration, ChatMessage message) : base(client,
             configuration,
             () =>
             {
                 return new ChatRequest()
                 {
-                    Messages = new List<ChatMessage>() { message }
+                    Messages = new List<ChatMessage>() { message },
+                    ModelId = ChatModelType.Gpt35Turbo0301.ToModel().Id
                 };
             })
         {
@@ -68,9 +63,9 @@ namespace Azure.Ai.OpenAi.Chat
         /// </summary>
         /// <param name="value">Value</param>
         /// <returns>Builder</returns>
-        public ChatRequestBuilder WithModel(ModelType model)
+        public ChatRequestBuilder WithModel(ChatModelType model)
         {
-            _request.ModelId = Model.FromModelType(model).Id;
+            _request.ModelId = model.ToModel().Id;
             return this;
         }
         /// <summary>

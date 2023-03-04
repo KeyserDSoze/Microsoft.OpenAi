@@ -1,25 +1,19 @@
-﻿using System.Collections.Generic;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using Azure.Ai.OpenAi.Completion;
 using Azure.Ai.OpenAi.Models;
 
 namespace Azure.Ai.OpenAi.Embedding
 {
     public sealed class EmbeddingRequestBuilder : RequestBuilder<EmbeddingRequest>
     {
-        private static readonly List<Model> s_models = new List<Model>()
-        {
-            Model.AdaTextEmbedding,
-        };
-        public override List<Model> AvailableModels => s_models;
         internal EmbeddingRequestBuilder(HttpClient client, OpenAiConfiguration configuration, string[] inputs)
             : base(client, configuration, () =>
             {
                 return new EmbeddingRequest()
                 {
                     Input = inputs.Length == 1 ? inputs[0] : (object)inputs,
+                    ModelId = EmbeddingModelType.AdaTextEmbedding.ToModel().Id,
                 };
             })
         {
@@ -59,9 +53,9 @@ namespace Azure.Ai.OpenAi.Embedding
         /// </summary>
         /// <param name="value">Value</param>
         /// <returns>Builder</returns>
-        public EmbeddingRequestBuilder WithModel(ModelType model)
+        public EmbeddingRequestBuilder WithModel(EmbeddingModelType model)
         {
-            _request.ModelId = Model.FromModelType(model).Id;
+            _request.ModelId = model.ToModel().Id;
             return this;
         }
         /// <summary>

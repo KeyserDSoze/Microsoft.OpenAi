@@ -1,10 +1,15 @@
-﻿using Azure.Ai.OpenAi;
-using System;
+﻿using System;
+using System.Net.Http;
 using System.Net.Http.Headers;
-using System.Text.Json.Serialization;
+using Azure.Ai.OpenAi;
+using Azure.Ai.OpenAi.Completion;
+using Azure.Ai.OpenAi.Embedding;
+using Azure.Ai.OpenAi.File;
+using Azure.Ai.OpenAi.Image;
+using Azure.Ai.OpenAi.Models;
+using Azure.Ai.OpenAi.Moderation;
 using Polly;
 using Polly.Extensions.Http;
-using System.Net.Http;
 
 namespace Microsoft.Extensions.DependencyInjection
 {

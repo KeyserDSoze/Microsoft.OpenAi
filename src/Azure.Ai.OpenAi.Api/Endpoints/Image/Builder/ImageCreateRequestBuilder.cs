@@ -12,7 +12,6 @@ namespace Azure.Ai.OpenAi.Image
 {
     public sealed class ImageCreateRequestBuilder : RequestBuilder<ImageCreateRequest>
     {
-        public override List<Model> AvailableModels => Model.Empty;
         internal ImageCreateRequestBuilder(HttpClient client, OpenAiConfiguration configuration, string prompt)
             : base(client, configuration, () =>
             {
@@ -21,7 +20,7 @@ namespace Azure.Ai.OpenAi.Image
                     Prompt = prompt,
                     NumberOfResults = 1,
                     Size = ImageSize.Large.AsString(),
-                    ResponseFormat = ResponseFormatUrl
+                    ResponseFormat = ResponseFormatUrl,
                 };
             })
         {

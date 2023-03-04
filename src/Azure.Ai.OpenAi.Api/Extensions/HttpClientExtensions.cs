@@ -59,7 +59,7 @@ namespace Azure.Ai.OpenAi
             object? message,
             [EnumeratorCancellation] CancellationToken cancellationToken)
         {
-            var response = await client.PrivatedExecuteAsync(url, message, true, false, cancellationToken);
+            var response = await client.PrivatedExecuteAsync(url, message, true, false, false, cancellationToken);
             using var stream = await response.Content.ReadAsStreamAsync();
             using var reader = new StreamReader(stream);
             string line;

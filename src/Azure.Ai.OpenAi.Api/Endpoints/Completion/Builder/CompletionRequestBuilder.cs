@@ -10,14 +10,13 @@ namespace Azure.Ai.OpenAi.Completion
 {
     public sealed class CompletionRequestBuilder : RequestBuilder<CompletionRequest>
     {
-        public override List<Model> AvailableModels => Model.AllText;
-
         internal CompletionRequestBuilder(HttpClient client, OpenAiConfiguration configuration, string[] prompts)
             : base(client, configuration, () =>
             {
                 return new CompletionRequest()
                 {
                     Prompt = prompts.Length > 1 ? (object)prompts : (prompts.Length == 1 ? prompts[1] : string.Empty),
+                    ModelId = TextModelType.DavinciText3.ToModel().Id
                 };
             })
         {
@@ -70,9 +69,9 @@ namespace Azure.Ai.OpenAi.Completion
         /// </summary>
         /// <param name="value">Value</param>
         /// <returns>Builder</returns>
-        public CompletionRequestBuilder WithModel(ModelType model)
+        public CompletionRequestBuilder WithModel(TextModelType model)
         {
-            _request.ModelId = Model.FromModelType(model).Id;
+            _request.ModelId = model.ToModel().Id;
             return this;
         }
         /// <summary>

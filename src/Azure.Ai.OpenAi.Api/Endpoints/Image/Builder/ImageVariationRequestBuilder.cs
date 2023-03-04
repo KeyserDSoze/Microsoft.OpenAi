@@ -12,7 +12,6 @@ namespace Azure.Ai.OpenAi.Image
 {
     public sealed class ImageVariationRequestBuilder : RequestBuilder<ImageVariationRequest>
     {
-        public override List<Model> AvailableModels => Model.Empty;
         internal ImageVariationRequestBuilder(HttpClient client, OpenAiConfiguration configuration,
             Stream image, string imageName)
             : base(client, configuration, () =>

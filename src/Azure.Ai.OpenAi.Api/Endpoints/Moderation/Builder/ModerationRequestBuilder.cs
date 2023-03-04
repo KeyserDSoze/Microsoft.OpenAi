@@ -1,26 +1,19 @@
-﻿using System.Collections.Generic;
-using System.Net.Http;
+﻿using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using Azure.Ai.OpenAi.Models;
 
-namespace Azure.Ai.OpenAi
+namespace Azure.Ai.OpenAi.Moderation
 {
     public sealed class ModerationRequestBuilder : RequestBuilder<ModerationsRequest>
     {
-        private static readonly List<Model> s_models = new List<Model>()
-        {
-            Model.TextModerationLatest,
-            Model.TextModerationStable
-        };
-        public override List<Model> AvailableModels => s_models;
-
         internal ModerationRequestBuilder(HttpClient client, OpenAiConfiguration configuration, string input)
             : base(client, configuration, () =>
             {
                 return new ModerationsRequest()
                 {
                     Input = input,
+                    ModelId = ModerationModelType.TextModerationLatest.ToModel().Id
                 };
             })
         {
@@ -36,9 +29,9 @@ namespace Azure.Ai.OpenAi
         /// </summary>
         /// <param name="value">Value</param>
         /// <returns>Builder</returns>
-        public ModerationRequestBuilder WithModel(ModelType model)
+        public ModerationRequestBuilder WithModel(ModerationModelType model)
         {
-            _request.ModelId = Model.FromModelType(model).Id;
+            _request.ModelId = model.ToModel().Id;
             return this;
         }
         /// <summary>

@@ -1,6 +1,6 @@
 ﻿using System.Net.Http;
 
-namespace Azure.Ai.OpenAi
+namespace Azure.Ai.OpenAi.Moderation
 {
     internal sealed class OpenAiModerationApi : IOpenAiModerationApi
     {

@@ -8,7 +8,6 @@ namespace Azure.Ai.OpenAi.FineTune
 {
     public sealed class FineTuneRequestBuilder : RequestBuilder<FineTuneRequest>
     {
-        public override List<Model> AvailableModels => Model.AllText;
         public FineTuneRequestBuilder(HttpClient client, OpenAiConfiguration configuration, string trainingFileId)
             : base(client, configuration, () =>
             {
@@ -23,7 +22,7 @@ namespace Azure.Ai.OpenAi.FineTune
         /// Execute operation.
         /// </summary>
         /// <returns>Builder</returns>
-        public ValueTask<FineTuneResult> ExecuteAsync(CancellationToken cancellationToken = default) 
+        public ValueTask<FineTuneResult> ExecuteAsync(CancellationToken cancellationToken = default)
             => _client.ExecuteAsync<FineTuneResult>(_configuration.FineTuneUri, _request, cancellationToken);
         /// <summary>
         /// The ID of an uploaded file that contains validation data.
@@ -36,16 +35,6 @@ namespace Azure.Ai.OpenAi.FineTune
         public FineTuneRequestBuilder WithValidationFile(string validationFileId)
         {
             _request.ValidationFile = validationFileId;
-            return this;
-        }
-        /// <summary>
-        /// ID of the model to use.
-        /// </summary>
-        /// <param name="value">Value</param>
-        /// <returns>Builder</returns>
-        public FineTuneRequestBuilder WithModel(ModelType model)
-        {
-            _request.ModelId = Model.FromModelType(model).Id;
             return this;
         }
         /// <summary>

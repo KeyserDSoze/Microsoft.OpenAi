@@ -1,8 +1,8 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Azure.Ai.OpenAi
+namespace Azure.Ai.OpenAi.Moderation
 {
-    public sealed class Categories
+    public sealed class ModerationCategories
     {
         [JsonPropertyName("hate")]
         public bool Hate { get; set; }

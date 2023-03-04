@@ -1,6 +1,6 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace Azure.Ai.OpenAi
+namespace Azure.Ai.OpenAi.Moderation
 {
     public sealed class ModerationsRequest : IOpenAiRequest
     {

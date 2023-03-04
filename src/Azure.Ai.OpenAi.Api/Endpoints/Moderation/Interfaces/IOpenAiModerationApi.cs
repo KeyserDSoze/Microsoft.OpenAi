@@ -1,4 +1,4 @@
-﻿namespace Azure.Ai.OpenAi
+﻿namespace Azure.Ai.OpenAi.Moderation
 {
     public interface IOpenAiModerationApi
     {

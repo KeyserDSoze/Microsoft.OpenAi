@@ -9,18 +9,13 @@ namespace Azure.Ai.OpenAi.Edit
 {
     public sealed class EditRequestBuilder : RequestBuilder<EditRequest>
     {
-        private static readonly List<Model> s_models = new List<Model>()
-        {
-            Model.TextDavinciEdit,
-            Model.CodeDavinciEdit
-        };
-        public override List<Model> AvailableModels => s_models;
         internal EditRequestBuilder(HttpClient client, OpenAiConfiguration configuration, string instruction) :
             base(client, configuration, () =>
             {
                 return new EditRequest
                 {
-                    Instruction = instruction
+                    Instruction = instruction,
+                    ModelId = EditModelType.TextDavinciEdit.ToModel().Id
                 };
             })
         {
@@ -36,9 +31,9 @@ namespace Azure.Ai.OpenAi.Edit
         /// </summary>
         /// <param name="value">Value</param>
         /// <returns>Builder</returns>
-        public EditRequestBuilder WithModel(ModelType model)
+        public EditRequestBuilder WithModel(EditModelType model)
         {
-            _request.ModelId = Model.FromModelType(model).Id;
+            _request.ModelId = model.ToModel().Id;
             return this;
         }
         /// <summary>
